@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Sérène</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500;600&family=Noto+Naskh+Arabic:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D0D0F; --surface:#16141E; --surface2:#221E30; --surface3:#2C2740;
+  --fg:#F0EBE3; --fg-muted:#8B7E97; --fg-dim:#5C5468;
+  --accent:#8B7BA8; --accent-bright:#A99BC4; --accent-dim:#5A4E72;
+  --gold:#C4A872; --green:#7BA88B; --rose:#A87B8B;
+  --danger:#C47272;
+}
+html,body{height:100%;background:var(--bg);color:var(--fg);font-family:'Inter',sans-serif;font-size:15px;line-height:1.6;overflow:hidden}
+html[dir="rtl"] body{font-family:'Noto Naskh Arabic','Inter',sans-serif}
+button{font-family:inherit;cursor:pointer}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:640px;margin:0 auto;position:relative}
+
+/* ============ HEADER ============ */
+#header{padding:20px 20px 12px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+#status-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:breathe 3.5s ease-in-out infinite;flex-shrink:0}
+@keyframes breathe{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.35)}}
+#header h1{font-family:'Fraunces',serif;font-size:19px;font-weight:300;font-style:italic;letter-spacing:.02em}
+#header-right{margin-inline-start:auto;display:flex;align-items:center;gap:8px}
+#lang-btn,#sos-btn{background:var(--surface);border:1px solid var(--surface3);color:var(--fg-muted);border-radius:20px;padding:6px 13px;font-size:12px;font-weight:500;transition:all .2s}
+#lang-btn:hover{color:var(--fg);border-color:var(--accent-dim)}
+#sos-btn{color:var(--danger);border-color:rgba(196,114,114,.3)}
+#sos-btn:hover{background:rgba(196,114,114,.12)}
+
+/* ============ NAV ============ */
+#nav{display:flex;gap:2px;padding:0 16px;flex-shrink:0;border-bottom:1px solid #1c1928}
+.nav-tab{background:none;border:none;color:var(--fg-dim);padding:10px 14px;font-size:13px;font-weight:500;position:relative;transition:color .25s;white-space:nowrap}
+.nav-tab.active{color:var(--fg)}
+.nav-tab.active::after{content:'';position:absolute;bottom:-1px;inset-inline:14px;height:2px;background:var(--accent);border-radius:2px}
+#nav{overflow-x:auto;scrollbar-width:none}
+#nav::-webkit-scrollbar{display:none}
+
+/* ============ VIEWS ============ */
+.view{flex:1;overflow-y:auto;display:none;flex-direction:column;scrollbar-width:thin;scrollbar-color:var(--surface3) transparent}
+.view.active{display:flex}
+.view::-webkit-scrollbar{width:4px}
+.view::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:2px}
+
+/* ============ CHAT ============ */
+#view-chat{padding:0}
+#messages{flex:1;overflow-y:auto;padding:28px 22px 16px;display:flex;flex-direction:column;gap:26px;scrollbar-width:thin;scrollbar-color:var(--surface3) transparent}
+.intro-msg{text-align:center;padding:36px 20px}
+.intro-msg p{font-family:'Fraunces',serif;font-size:15px;font-weight:300;font-style:italic;color:var(--fg-muted);line-height:1.85;max-width:340px;margin:0 auto}
+.intro-divider{width:30px;height:1px;background:var(--accent-dim);margin:20px auto 0;opacity:.5}
+.disclaimer{font-size:10.5px;color:var(--fg-dim);max-width:300px;margin:14px auto 0;line-height:1.6}
+.msg-user{display:flex;justify-content:flex-end}
+.msg-user .bubble{background:var(--surface3);color:var(--fg);padding:12px 17px;border-radius:18px 18px 4px 18px;max-width:80%;font-size:14.5px;line-height:1.65}
+html[dir="rtl"] .msg-user .bubble{border-radius:18px 18px 18px 4px}
+.msg-ai{display:flex;flex-direction:column;align-items:flex-start;padding-inline-start:4px}
+.msg-ai .response-text{font-family:'Fraunces',serif;font-size:16px;font-weight:300;line-height:1.9;color:var(--fg);max-width:88%;border-inline-start:1px solid var(--accent-dim);padding-inline-start:16px}
+html[dir="rtl"] .msg-ai .response-text{font-family:'Noto Naskh Arabic',serif;font-size:17px}
+.msg-ai .response-text em{font-style:italic;color:var(--accent-bright)}
+.crisis-card{background:rgba(196,114,114,.08);border:1px solid rgba(196,114,114,.3);border-radius:14px;padding:16px 18px;max-width:88%;margin-top:10px}
+.crisis-card h4{font-size:13px;font-weight:600;color:var(--danger);margin-bottom:8px}
+.crisis-card p{font-size:13px;color:var(--fg-muted);line-height:1.6;margin-bottom:10px}
+.crisis-card a{display:inline-block;color:var(--fg);background:rgba(196,114,114,.2);padding:7px 14px;border-radius:10px;font-size:13px;text-decoration:none;margin:3px 4px 3px 0}
+#presence{display:none;align-items:center;gap:10px;padding:0 26px 10px}
+#presence.visible{display:flex}
+.candle{width:8px;display:flex;flex-direction:column;align-items:center}
+.candle-flame{width:6px;height:9px;background:var(--accent);border-radius:50% 50% 40% 40%;animation:flicker 1.5s ease-in-out infinite;opacity:.85}
+@keyframes flicker{0%,100%{transform:scaleY(1);opacity:.7}25%{transform:scaleY(1.12) scaleX(.9);opacity:1}50%{transform:scaleY(.95) scaleX(1.05);opacity:.8}75%{transform:scaleY(1.05) scaleX(.95);opacity:.9}}
+.candle-body{width:4px;height:10px;background:var(--accent-dim);opacity:.4;border-radius:0 0 2px 2px}
+.presence-text{font-size:11px;color:var(--fg-muted);font-weight:300;font-style:italic}
+#input-area{padding:12px 20px calc(20px + env(safe-area-inset-bottom));flex-shrink:0;border-top:1px solid #1c1928}
+#input-wrap{display:flex;align-items:flex-end;gap:12px;background:var(--surface);border:1px solid var(--surface3);border-radius:16px;padding:13px 15px;transition:border-color .2s}
+#input-wrap:focus-within{border-color:var(--accent-dim)}
+#input{flex:1;background:none;border:none;outline:none;color:var(--fg);font-family:inherit;font-size:14.5px;line-height:1.6;resize:none;max-height:130px;min-height:22px;caret-color:var(--accent)}
+#input::placeholder{color:var(--fg-dim);font-style:italic;font-weight:300}
+#send-btn{background:none;border:none;padding:4px;color:var(--accent-dim);transition:color .2s,transform .15s;display:flex;border-radius:50%}
+#send-btn:hover:not(:disabled){color:var(--accent);transform:scale(1.1)}
+#send-btn:disabled{opacity:.3;cursor:default}
+#send-btn svg{width:18px;height:18px}
+#mic-btn{background:none;border:none;padding:4px;color:var(--accent-dim);transition:color .2s,transform .15s;display:flex;border-radius:50%;flex-shrink:0}
+#mic-btn:hover{color:var(--accent);transform:scale(1.08)}
+#mic-btn svg{width:18px;height:18px}
+#mic-btn.recording{color:var(--danger);animation:micpulse 1.2s ease-in-out infinite}
+@keyframes micpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+#voice-mode-btn{width:100%;margin-top:10px;background:none;border:1px solid var(--surface3);color:var(--fg-muted);border-radius:14px;padding:11px;font-size:12.5px;font-weight:500;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+#voice-mode-btn:hover{border-color:var(--accent-dim);color:var(--fg)}
+#voice-mode-btn::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);opacity:.7}
+
+/* VOICE OVERLAY */
+#voice-overlay{position:fixed;inset:0;background:radial-gradient(circle at 50% 40%,#1a1726 0%,#0D0D0F 70%);z-index:110;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 30px calc(40px + env(safe-area-inset-bottom));gap:30px}
+#voice-overlay.visible{display:flex}
+#voice-exit{position:absolute;top:calc(20px + env(safe-area-inset-top));inset-inline-end:24px;background:var(--surface);border:1px solid var(--surface3);color:var(--fg-muted);width:38px;height:38px;border-radius:50%;font-size:15px}
+#voice-exit:hover{color:var(--fg)}
+#voice-orb-wrap{position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center}
+#voice-orb{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#A99BC4,#5A4E72 75%);box-shadow:0 0 70px rgba(139,123,168,.4);transition:transform .25s ease;z-index:2}
+#voice-orb-ring{position:absolute;width:120px;height:120px;border-radius:50%;border:1px solid var(--accent);opacity:0}
+#voice-overlay.listening #voice-orb{animation:orbListen 1.6s ease-in-out infinite}
+#voice-overlay.listening #voice-orb-ring{animation:orbRing 1.6s ease-out infinite}
+#voice-overlay.speaking #voice-orb{animation:orbSpeak .9s ease-in-out infinite}
+@keyframes orbListen{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@keyframes orbSpeak{0%,100%{transform:scale(1.04)}50%{transform:scale(.94)}}
+@keyframes orbRing{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.9);opacity:0}}
+#voice-status{font-family:'Fraunces',serif;font-style:italic;font-size:17px;font-weight:300;color:var(--accent-bright);text-align:center;min-height:24px}
+#voice-transcript{font-size:14px;color:var(--fg-muted);text-align:center;max-width:340px;line-height:1.7;min-height:48px;font-weight:300}
+#voice-toggle{background:var(--accent-dim);border:none;color:var(--fg);border-radius:30px;padding:15px 44px;font-size:15px;font-weight:500;transition:all .25s}
+#voice-toggle:hover{background:var(--accent)}
+#voice-toggle.active{background:var(--danger)}
+.voice-bubble{display:flex;align-items:center;gap:11px;min-width:130px}
+.vb-play{background:var(--accent);border:none;color:#0D0D0F;width:32px;height:32px;border-radius:50%;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vb-mic{font-size:18px}
+.vb-wave{display:flex;align-items:center;gap:3px;height:24px}
+.vb-wave span{width:3px;border-radius:2px;background:var(--accent-bright);opacity:.7;height:30%}
+.vb-wave span:nth-child(1){height:40%}.vb-wave span:nth-child(2){height:75%}.vb-wave span:nth-child(3){height:55%}.vb-wave span:nth-child(4){height:90%}.vb-wave span:nth-child(5){height:50%}.vb-wave span:nth-child(6){height:70%}.vb-wave span:nth-child(7){height:35%}
+.vb-wave.playing span{animation:wave .8s ease-in-out infinite}
+.vb-wave.playing span:nth-child(2){animation-delay:.1s}.vb-wave.playing span:nth-child(3){animation-delay:.2s}.vb-wave.playing span:nth-child(4){animation-delay:.3s}.vb-wave.playing span:nth-child(5){animation-delay:.15s}.vb-wave.playing span:nth-child(6){animation-delay:.25s}.vb-wave.playing span:nth-child(7){animation-delay:.05s}
+@keyframes wave{0%,100%{transform:scaleY(.6)}50%{transform:scaleY(1.3)}}
+
+/* ============ BREATHE ============ */
+#view-breathe{align-items:center;justify-content:flex-start;padding:30px 24px 40px;gap:26px}
+.breathe-title{font-family:'Fraunces',serif;font-size:20px;font-weight:300;font-style:italic;text-align:center}
+.breathe-sub{font-size:13px;color:var(--fg-muted);text-align:center;max-width:300px;margin-top:-16px;line-height:1.7}
+#breathe-circle-wrap{position:relative;width:240px;height:240px;display:flex;align-items:center;justify-content:center;margin:8px 0}
+#breathe-ring{position:absolute;inset:0;border-radius:50%;border:1px solid var(--surface3)}
+#breathe-circle{width:110px;height:110px;border-radius:50%;background:radial-gradient(circle at 35% 35%, #A99BC4, #5A4E72 70%);box-shadow:0 0 60px rgba(139,123,168,.35);transition:transform .3s ease;display:flex;align-items:center;justify-content:center}
+#breathe-phase{position:absolute;bottom:-38px;width:100%;text-align:center;font-family:'Fraunces',serif;font-style:italic;font-size:16px;color:var(--accent-bright);font-weight:300;letter-spacing:.03em}
+#breathe-count{font-size:26px;font-weight:300;color:rgba(13,13,15,.75);font-family:'Fraunces',serif}
+.breathe-techniques{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:24px}
+.tech-btn{background:var(--surface);border:1px solid var(--surface3);color:var(--fg-muted);border-radius:14px;padding:10px 16px;font-size:12.5px;transition:all .2s}
+.tech-btn.active{border-color:var(--accent);color:var(--fg);background:var(--surface2)}
+.tech-desc{font-size:11.5px;color:var(--fg-dim);text-align:center;max-width:280px;line-height:1.6;min-height:36px}
+#breathe-start{background:var(--accent-dim);border:none;color:var(--fg);border-radius:24px;padding:13px 38px;font-size:14px;font-weight:500;transition:all .25s;margin-top:4px}
+#breathe-start:hover{background:var(--accent)}
+#breathe-start.running{background:var(--surface3)}
+
+/* ============ JOURNAL ============ */
+#view-journal{padding:24px 22px 40px;gap:22px}
+.j-section-title{font-family:'Fraunces',serif;font-size:17px;font-weight:300;font-style:italic;margin-bottom:4px}
+.mood-row{display:flex;gap:8px;justify-content:space-between}
+.mood-btn{flex:1;background:var(--surface);border:1px solid var(--surface3);border-radius:14px;padding:14px 4px;font-size:24px;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:5px}
+.mood-btn span{font-size:10px;color:var(--fg-dim);font-weight:500}
+.mood-btn:hover{transform:translateY(-2px)}
+.mood-btn.selected{border-color:var(--accent);background:var(--surface2);box-shadow:0 0 20px rgba(139,123,168,.15)}
+#journal-text{background:var(--surface);border:1px solid var(--surface3);border-radius:14px;padding:14px 16px;color:var(--fg);font-family:inherit;font-size:14px;line-height:1.7;resize:vertical;min-height:90px;width:100%;outline:none}
+#journal-text:focus{border-color:var(--accent-dim)}
+.j-audio-row{display:flex;flex-direction:column;gap:10px;margin-top:-8px}
+#j-audio-btn{display:flex;align-items:center;justify-content:center;gap:9px;background:var(--surface);border:1px solid var(--surface3);color:var(--fg-muted);border-radius:14px;padding:12px;font-size:13px;font-weight:500;transition:all .2s}
+#j-audio-btn:hover{border-color:var(--accent-dim);color:var(--fg)}
+#j-audio-btn.recording{border-color:var(--danger);color:var(--danger)}
+#j-audio-btn.recording .ja-icon{animation:micpulse 1.2s ease-in-out infinite}
+#j-audio-preview:empty{display:none}
+#j-audio-preview .voice-bubble{display:inline-flex;align-items:center;gap:11px;background:var(--surface2);border-radius:14px;padding:11px 15px}
+#journal-text::placeholder{color:var(--fg-dim);font-style:italic}
+.gratitude-hint{font-size:11.5px;color:var(--fg-dim);font-style:italic;margin-top:-14px}
+#journal-save{background:var(--accent-dim);border:none;color:var(--fg);border-radius:14px;padding:13px;font-size:14px;font-weight:500;transition:background .25s}
+#journal-save:hover{background:var(--accent)}
+#journal-save:disabled{opacity:.4;cursor:default}
+#chart-wrap{background:var(--surface);border:1px solid var(--surface3);border-radius:16px;padding:18px 16px 10px}
+#chart-title{font-size:12px;color:var(--fg-muted);font-weight:500;margin-bottom:12px;letter-spacing:.04em}
+#mood-chart{width:100%;height:120px}
+.entries-list{display:flex;flex-direction:column;gap:12px}
+.entry-card{background:var(--surface);border:1px solid var(--surface3);border-radius:14px;padding:14px 16px}
+.entry-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.entry-mood{font-size:18px}
+.entry-date{font-size:11px;color:var(--fg-dim)}
+.entry-del{margin-inline-start:auto;background:none;border:none;color:var(--fg-dim);font-size:11px;opacity:.6}
+.entry-del:hover{color:var(--danger);opacity:1}
+.entry-text{font-size:13.5px;color:var(--fg-muted);line-height:1.65;white-space:pre-wrap}
+.empty-state{font-size:13px;color:var(--fg-dim);font-style:italic;text-align:center;padding:20px}
+#storage-note{font-size:10.5px;color:var(--fg-dim);text-align:center;line-height:1.6}
+
+/* ============ RESOURCES ============ */
+#view-resources{padding:24px 22px 40px;gap:26px}
+.res-section h3{font-family:'Fraunces',serif;font-size:17px;font-weight:300;font-style:italic;margin-bottom:14px}
+.sound-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.library-sub{font-size:11.5px;color:var(--fg-dim);font-style:italic;line-height:1.6;margin-bottom:14px}
+.track-list{display:flex;flex-direction:column;gap:10px}
+.track-card{display:flex;align-items:center;gap:13px;background:var(--surface);border:1px solid var(--surface3);border-radius:14px;padding:13px 15px;transition:all .2s}
+.track-card.playing{border-color:var(--accent);background:var(--surface2)}
+.track-play{background:var(--accent);border:none;color:#0D0D0F;width:38px;height:38px;border-radius:50%;font-size:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.track-meta{flex:1;min-width:0}
+.track-name{font-size:14px;font-weight:500;color:var(--fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track-type{font-size:11px;color:var(--fg-dim);margin-top:2px;display:flex;align-items:center;gap:5px}
+.track-type::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent-dim)}
+.track-del{background:none;border:none;color:var(--fg-dim);font-size:13px;flex-shrink:0;padding:6px}
+.track-del:hover{color:var(--danger)}
+.track-empty{font-size:13px;color:var(--fg-dim);font-style:italic;text-align:center;padding:24px 16px;line-height:1.7}
+#track-dialog{position:fixed;inset:0;background:rgba(13,13,15,.85);z-index:130;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
+#track-dialog.visible{display:flex}
+#track-dialog-box{background:var(--surface2);border:1px solid var(--surface3);border-radius:20px;padding:24px;width:100%;max-width:380px;display:flex;flex-direction:column;gap:14px}
+#td-title{font-family:'Fraunces',serif;font-size:18px;font-weight:300;font-style:italic;color:var(--fg)}
+#track-dialog-box input[type=text],#track-dialog-box select{background:var(--surface);border:1px solid var(--surface3);border-radius:12px;padding:12px 14px;color:var(--fg);font-family:inherit;font-size:14px;outline:none;width:100%}
+#track-dialog-box input:focus,#track-dialog-box select:focus{border-color:var(--accent-dim)}
+.td-tabs{display:flex;gap:8px}
+.td-tab{flex:1;background:var(--surface);border:1px solid var(--surface3);color:var(--fg-muted);border-radius:11px;padding:10px;font-size:12.5px;font-weight:500;transition:all .2s}
+.td-tab.active{border-color:var(--accent);color:var(--fg);background:var(--surface3)}
+#td-pick{background:var(--surface);border:1px solid var(--surface3);color:var(--fg-muted);border-radius:12px;padding:12px;font-size:13px;width:100%;transition:all .2s}
+#td-pick:hover{border-color:var(--accent-dim);color:var(--fg)}
+#td-filename{font-size:12px;color:var(--accent-bright);display:block;margin-top:8px;word-break:break-all}
+#td-link-hint{font-size:11px;color:var(--fg-dim);line-height:1.5;margin-top:8px}
+.td-actions{display:flex;gap:10px;margin-top:4px}
+.td-actions button{flex:1;border-radius:12px;padding:12px;font-size:14px;font-weight:500;border:none}
+#td-cancel{background:var(--surface);color:var(--fg-muted);border:1px solid var(--surface3)}
+#td-save{background:var(--accent-dim);color:var(--fg)}
+#td-save:hover{background:var(--accent)}
+.sound-card{background:var(--surface);border:1px solid var(--surface3);border-radius:16px;padding:18px 16px;display:flex;flex-direction:column;gap:6px;transition:all .2s;text-align:start;border:none;outline:1px solid var(--surface3)}
+.sound-card:hover{outline-color:var(--accent-dim)}
+.sound-card.playing{outline-color:var(--accent);background:var(--surface2)}
+.sound-icon{font-size:22px}
+.sound-name{font-size:13px;font-weight:500;color:var(--fg)}
+.sound-state{font-size:10.5px;color:var(--fg-dim)}
+.poem-card{background:linear-gradient(160deg,var(--surface) 0%,var(--surface2) 100%);border:1px solid var(--surface3);border-radius:18px;padding:26px 24px;position:relative;overflow:hidden}
+.poem-card::before{content:'';position:absolute;top:-40px;inset-inline-end:-40px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(139,123,168,.12),transparent 70%)}
+.poem-text{font-family:'Fraunces',serif;font-size:16.5px;font-weight:300;font-style:italic;line-height:2;color:var(--fg);white-space:pre-line}
+html[dir="rtl"] .poem-text{font-family:'Noto Naskh Arabic',serif}
+.poem-nav{display:flex;align-items:center;justify-content:space-between;margin-top:18px}
+.poem-nav button{background:none;border:1px solid var(--surface3);color:var(--fg-muted);border-radius:50%;width:34px;height:34px;font-size:15px;transition:all .2s}
+.poem-nav button:hover{color:var(--fg);border-color:var(--accent-dim)}
+.poem-index{font-size:11px;color:var(--fg-dim);letter-spacing:.1em}
+.art-scroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+.art-scroll::-webkit-scrollbar{display:none}
+.art-card{cursor:pointer}
+.refuge-head{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.refuge-head h3{font-family:'Fraunces',serif;font-size:17px;font-weight:300;font-style:italic;margin:0}
+#refuge-add{margin-inline-start:auto;background:var(--surface2);border:1px solid var(--surface3);color:var(--accent-bright);width:32px;height:32px;border-radius:50%;font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+#refuge-add:hover{border-color:var(--accent);background:var(--surface3)}
+.refuge-hint{font-size:11.5px;color:var(--fg-dim);font-style:italic;line-height:1.6;margin-bottom:14px}
+.refuge-card{flex-shrink:0;width:200px;height:260px;border-radius:18px;position:relative;overflow:hidden;background-size:cover;background-position:center;cursor:pointer}
+.refuge-card .refuge-del{position:absolute;top:8px;inset-inline-end:8px;background:rgba(13,13,15,.6);border:none;color:#F0EBE3;width:28px;height:28px;border-radius:50%;font-size:13px;z-index:3;backdrop-filter:blur(4px)}
+.refuge-empty{flex-shrink:0;width:200px;height:260px;border-radius:18px;border:1px dashed var(--surface3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--fg-dim);background:none;cursor:pointer;text-align:center;padding:20px}
+.refuge-empty:hover{border-color:var(--accent-dim);color:var(--fg-muted)}
+.refuge-empty .re-icon{font-size:28px;opacity:.6}
+.refuge-empty .re-txt{font-size:12px;font-style:italic;line-height:1.5}
+#img-viewer{position:fixed;inset:0;background:#000;z-index:120;display:none;flex-direction:column;align-items:center;justify-content:center;padding:0}
+#img-viewer.visible{display:flex}
+#img-close{position:absolute;top:calc(20px + env(safe-area-inset-top));inset-inline-end:24px;background:rgba(40,36,55,.7);border:none;color:#F0EBE3;width:40px;height:40px;border-radius:50%;font-size:16px;z-index:5;backdrop-filter:blur(6px)}
+#img-content{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+#img-content img{max-width:100%;max-height:100%;object-fit:contain}
+#img-content .grad-full{width:100%;height:100%}
+#img-caption{position:absolute;bottom:calc(40px + env(safe-area-inset-bottom));font-family:'Fraunces',serif;font-style:italic;font-size:16px;font-weight:300;color:rgba(240,235,227,.85);text-shadow:0 2px 12px rgba(0,0,0,.6);padding:0 30px;text-align:center}
+.art-card{flex-shrink:0;width:200px;height:260px;border-radius:18px;position:relative;overflow:hidden;display:flex;align-items:flex-end}
+.art-label{padding:14px;font-family:'Fraunces',serif;font-size:12.5px;font-style:italic;font-weight:300;color:rgba(240,235,227,.9);text-shadow:0 1px 8px rgba(0,0,0,.4);position:relative;z-index:2}
+.quote-card{background:var(--surface);border-inline-start:2px solid var(--gold);border-radius:0 14px 14px 0;padding:18px 20px}
+html[dir="rtl"] .quote-card{border-radius:14px 0 0 14px}
+.quote-text{font-family:'Fraunces',serif;font-size:15px;font-style:italic;font-weight:300;line-height:1.85;color:var(--fg)}
+.quote-refresh{background:none;border:none;color:var(--fg-dim);font-size:11px;margin-top:10px;letter-spacing:.05em}
+.quote-refresh:hover{color:var(--accent)}
+
+/* ============ SOS OVERLAY ============ */
+#sos-overlay{position:fixed;inset:0;background:rgba(13,13,15,.97);z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px;gap:22px;overflow-y:auto}
+#sos-overlay.visible{display:flex}
+.sos-title{font-family:'Fraunces',serif;font-size:22px;font-weight:300;font-style:italic;text-align:center}
+.sos-text{font-size:14px;color:var(--fg-muted);text-align:center;max-width:320px;line-height:1.8}
+.sos-actions{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px}
+.sos-action{background:var(--surface);border:1px solid var(--surface3);color:var(--fg);border-radius:14px;padding:15px 18px;font-size:14px;text-align:start;transition:all .2s;text-decoration:none;display:block}
+.sos-action:hover{border-color:var(--accent-dim);background:var(--surface2)}
+.sos-action small{display:block;font-size:11px;color:var(--fg-dim);margin-top:3px}
+.sos-close{background:none;border:none;color:var(--fg-dim);font-size:13px;margin-top:8px;text-decoration:underline}
+.sos-close:hover{color:var(--fg)}
+
+/* ============ LANG MENU ============ */
+#lang-menu{position:fixed;top:60px;inset-inline-end:max(16px,calc((100vw - 640px)/2 + 16px));background:var(--surface2);border:1px solid var(--surface3);border-radius:16px;padding:8px;z-index:90;display:none;flex-direction:column;min-width:160px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+#lang-menu.visible{display:flex}
+.lang-opt{background:none;border:none;color:var(--fg-muted);padding:10px 14px;font-size:13px;text-align:start;border-radius:10px;transition:all .15s}
+.lang-opt:hover{background:var(--surface3);color:var(--fg)}
+.lang-opt.active{color:var(--accent-bright);font-weight:500}
+
+.msg-enter{animation:fadeSlide .35s ease forwards}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:480px){
+  #messages{padding:22px 16px 12px}
+  #view-journal,#view-resources,#view-breathe{padding-inline:16px}
+  .art-card{width:170px;height:220px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <div id="status-dot"></div>
+    <h1 id="app-title">Sérène</h1>
+    <div id="header-right">
+      <button id="lang-btn">FR</button>
+      <button id="sos-btn">SOS</button>
+    </div>
+  </div>
+
+  <div id="nav">
+    <button class="nav-tab active" data-view="chat"></button>
+    <button class="nav-tab" data-view="breathe"></button>
+    <button class="nav-tab" data-view="journal"></button>
+    <button class="nav-tab" data-view="resources"></button>
+  </div>
+
+  <!-- CHAT -->
+  <div class="view active" id="view-chat">
+    <div id="messages">
+      <div class="intro-msg">
+        <p id="intro-text"></p>
+        <div class="intro-divider"></div>
+        <p class="disclaimer" id="disclaimer-text"></p>
+      </div>
+    </div>
+    <div id="presence">
+      <div class="candle"><div class="candle-flame"></div><div class="candle-body"></div></div>
+      <span class="presence-text" id="presence-label"></span>
+    </div>
+    <div id="input-area">
+      <div id="input-wrap">
+        <button id="mic-btn" aria-label="Voice" title="">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>
+        </button>
+        <textarea id="input" rows="1"></textarea>
+        <button id="send-btn" aria-label="Send" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+      </div>
+      <button id="voice-mode-btn"><span id="voice-mode-label"></span></button>
+    </div>
+  </div>
+
+  <!-- BREATHE -->
+  <div class="view" id="view-breathe">
+    <h2 class="breathe-title" id="breathe-title"></h2>
+    <p class="breathe-sub" id="breathe-sub"></p>
+    <div id="breathe-circle-wrap">
+      <div id="breathe-ring"></div>
+      <div id="breathe-circle"><span id="breathe-count"></span></div>
+      <div id="breathe-phase"></div>
+    </div>
+    <div class="breathe-techniques" id="tech-row"></div>
+    <p class="tech-desc" id="tech-desc"></p>
+    <button id="breathe-start"></button>
+  </div>
+
+  <!-- JOURNAL -->
+  <div class="view" id="view-journal">
+    <div>
+      <h2 class="j-section-title" id="j-today-title"></h2>
+      <div class="mood-row" id="mood-row"></div>
+    </div>
+    <textarea id="journal-text"></textarea>
+    <div class="j-audio-row">
+      <button id="j-audio-btn"><span class="ja-icon">🎤</span><span id="j-audio-label"></span></button>
+      <div id="j-audio-preview"></div>
+    </div>
+    <p class="gratitude-hint" id="gratitude-hint"></p>
+    <button id="journal-save"></button>
+    <div id="chart-wrap">
+      <div id="chart-title"></div>
+      <svg id="mood-chart" viewBox="0 0 320 120" preserveAspectRatio="none"></svg>
+    </div>
+    <div>
+      <h2 class="j-section-title" id="j-history-title"></h2>
+      <div class="entries-list" id="entries-list"></div>
+    </div>
+    <p id="storage-note"></p>
+  </div>
+
+  <!-- RESOURCES -->
+  <div class="view" id="view-resources">
+    <div class="res-section">
+      <h3 id="res-sounds-title"></h3>
+      <div class="sound-grid" id="sound-grid"></div>
+    </div>
+    <div class="res-section">
+      <div class="refuge-head">
+        <h3 id="res-library-title"></h3>
+        <button id="library-add" aria-label="add" style="display:none">+</button>
+      </div>
+      <p class="library-sub" id="library-sub"></p>
+      <div class="track-list" id="track-list"></div>
+    </div>
+    <div class="res-section">
+      <h3 id="res-poems-title"></h3>
+      <div class="poem-card">
+        <div class="poem-text" id="poem-text"></div>
+        <div class="poem-nav">
+          <button id="poem-prev">‹</button>
+          <span class="poem-index" id="poem-index"></span>
+          <button id="poem-next">›</button>
+        </div>
+      </div>
+    </div>
+    <div class="res-section">
+      <h3 id="res-art-title"></h3>
+      <div class="art-scroll" id="art-scroll"></div>
+    </div>
+    <div class="res-section">
+      <div class="refuge-head">
+        <h3 id="res-refuge-title"></h3>
+        <button id="refuge-add" aria-label="add">+</button>
+      </div>
+      <p class="refuge-hint" id="refuge-hint"></p>
+      <div class="art-scroll" id="refuge-scroll"></div>
+      <input type="file" id="refuge-input" accept="image/*" capture="environment" hidden>
+    </div>
+    <div class="res-section">
+      <h3 id="res-quote-title"></h3>
+      <div class="quote-card">
+        <div class="quote-text" id="quote-text"></div>
+        <button class="quote-refresh" id="quote-refresh"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SOS -->
+<div id="sos-overlay">
+  <h2 class="sos-title" id="sos-title"></h2>
+  <p class="sos-text" id="sos-text"></p>
+  <div class="sos-actions" id="sos-actions"></div>
+  <button class="sos-close" id="sos-close"></button>
+</div>
+
+<div id="lang-menu"></div>
+
+<!-- IMAGE VIEWER -->
+<div id="img-viewer">
+  <button id="img-close" aria-label="close">✕</button>
+  <div id="img-content"></div>
+  <p id="img-caption"></p>
+</div>
+
+<!-- ADD TRACK DIALOG (admin) -->
+<div id="track-dialog">
+  <div id="track-dialog-box">
+    <h3 id="td-title"></h3>
+    <input type="text" id="td-name" placeholder="">
+    <div class="td-tabs">
+      <button class="td-tab active" data-mode="file" id="td-tab-file"></button>
+      <button class="td-tab" data-mode="link" id="td-tab-link"></button>
+    </div>
+    <div id="td-file-area">
+      <button id="td-pick"></button>
+      <span id="td-filename"></span>
+      <input type="file" id="td-file" accept="audio/*" hidden>
+    </div>
+    <div id="td-link-area" style="display:none">
+      <input type="text" id="td-url" placeholder="https://...mp3">
+      <p id="td-link-hint"></p>
+    </div>
+    <select id="td-type"></select>
+    <div class="td-actions">
+      <button id="td-cancel"></button>
+      <button id="td-save"></button>
+    </div>
+  </div>
+</div>
+
+<!-- VOICE DIALOGUE MODE -->
+<div id="voice-overlay">
+  <button id="voice-exit" aria-label="Close">✕</button>
+  <div id="voice-orb-wrap">
+    <div id="voice-orb"></div>
+    <div id="voice-orb-ring"></div>
+  </div>
+  <p id="voice-status"></p>
+  <p id="voice-transcript"></p>
+  <button id="voice-toggle"></button>
+</div>
+
+<script>
+/* ================= I18N ================= */
+const LANGS = {
+  fr:{name:'Français',dir:'ltr'},
+  en:{name:'English',dir:'ltr'},
+  ar:{name:'العربية',dir:'rtl'},
+  es:{name:'Español',dir:'ltr'},
+  pt:{name:'Português',dir:'ltr'},
+  ja:{name:'日本語',dir:'ltr'},
+  ur:{name:'اردو',dir:'rtl'},
+  sw:{name:'Kiswahili',dir:'ltr'}
+};
+
+const T = {
+fr:{
+  appTitle:'Sérène',
+  tabs:{chat:'Se confier',breathe:'Respirer',journal:'Journal',resources:'Ressources'},
+  intro:"Tu n'as pas besoin d'expliquer\npour mériter d'être entendu.\nDis ce qui pèse.",
+  disclaimer:"Cet espace n'est pas un substitut à un professionnel de santé. En cas de détresse grave, touche SOS.",
+  placeholder:'Ce soir, je voulais dire que…',
+  presence:'présence…',
+  errorMsg:"Je suis là, mais quelque chose s'est interrompu. Réessaie.",
+  breatheTitle:'On respire ensemble',
+  breatheSub:'Quelques minutes suffisent pour apaiser le corps. Choisis un rythme, et laisse-toi guider.',
+  techniques:{coherence:{name:'Cohérence 5-5',desc:'5s inspiration, 5s expiration. Le rythme le plus validé pour calmer le système nerveux.'},box:{name:'Carré 4-4-4-4',desc:'Inspire, retiens, expire, retiens. Pour retrouver le focus.'},sleep:{name:'Sommeil 4-7-8',desc:'Inspire 4s, retiens 7s, expire 8s. Pour préparer la nuit.'}},
+  phases:{inhale:'inspire…',hold:'retiens…',exhale:'expire…',rest:'pause…'},
+  start:'Commencer',stop:'Arrêter',
+  jToday:"Comment te sens-tu aujourd'hui ?",
+  moods:['Difficile','Lourd','Neutre','Bien','Lumineux'],
+  journalPlaceholder:"Quelques mots sur ta journée… ou trois choses pour lesquelles tu te sens reconnaissant.",
+  gratitudeHint:"Astuce : noter ce qui va bien, même les petites choses, change doucement le regard.",
+  save:'Garder cette trace',saved:'Gardé ✓',jAudio:'Note vocale',jAudioStop:'Arrêter',
+  chartTitle:'TON ÉVOLUTION — 14 DERNIERS JOURS',
+  history:'Tes traces',
+  emptyEntries:"Aucune trace pour l'instant. Le carnet t'attend.",
+  storageNote:'Tout reste sur cet appareil. Rien ne quitte cet espace sans toi.',
+  delete:'effacer',
+  resSounds:'Sons pour respirer',
+  resLibrary:'À écouter',librarySub:'Poésie dite, musiques douces — ferme les yeux et laisse-toi porter.',libraryEmpty:'Rien ici pour l\'instant. Des pistes apaisantes arrivent bientôt.',
+  tdTitle:'Ajouter une piste',tdName:'Titre de la piste',tdFile:'Fichier',tdLink:'Lien',tdPick:'Choisir un fichier audio',tdUrl:'Lien audio',tdLinkHint:'Lien MP3 direct ou SoundCloud. YouTube n\'est pas lisible en audio seul.',tdCancel:'Annuler',tdSave:'Ajouter',tdYTWarn:'Les liens YouTube ne peuvent pas être lus ici. Utilise un MP3 ou SoundCloud.',
+  tdTypes:{poetry:'Poésie',music:'Musique douce',nature:'Nature',voice:'Voix'},adminOn:'Mode admin activé',adminOff:'Mode admin désactivé',
+  sounds:{rain:'Pluie lointaine',wind:'Vent doux',deep:'Profondeur',night:'Nuit calme'},
+  play:'écouter',playing:'en cours…',
+  resPoems:'Mots qui apaisent',
+  resArt:'Contempler',
+  resRefuge:'Mes refuges',
+  refugeHint:'Ajoute tes propres images — un lieu, un visage, un souvenir qui t\'apaise. Elles restent sur cet appareil, rien qu\'à toi.',
+  resQuote:'Une pensée',
+  another:'UNE AUTRE',
+  sosTitle:'Tu n\'es pas seul·e.',
+  sosText:'Si tu traverses un moment très difficile, il existe des personnes formées pour t\'écouter, maintenant, gratuitement.',
+  sosBreathe:'Respirer ensemble d\'abord',
+  sosBreatheSub:'2 minutes pour faire redescendre la vague',
+  sosClose:'Revenir',
+  crisisTitle:'Ce que tu portes est lourd.',
+  crisisText:'Tu mérites un vrai soutien humain, maintenant. Ces lignes sont gratuites et confidentielles :',
+  artLabels:['Brume du matin','Mer intérieure','Jardin de nuit','Lueur dorée','Montagne calme'],
+  poems:[
+"Ce qui est lourd aujourd'hui\nne le sera pas toujours.\nLes saisons changent\nmême en nous.",
+"Tu as survécu\nà tous tes pires jours.\nCelui-ci aussi\npassera.",
+"La patience n'est pas attendre.\nC'est garder le cœur ouvert\npendant que l'on attend.",
+"Il y a une paix\nqui ne dépend de rien —\nni des nouvelles, ni des gens,\nelle t'attend en dedans.",
+"Tu n'es pas ce qui t'est arrivé.\nTu es ce que tu choisis\nde devenir,\nun matin à la fois."],
+  quotes:[
+"Ce que tu ne peux pas changer, dépose-le. Tes épaules sont faites pour ta journée, pas pour le monde.",
+"La gratitude transforme ce que nous avons en assez.",
+"L'épreuve qui te traverse est aussi en train de te construire.",
+"Sois doux avec toi-même. Tu fais de ton mieux avec ce que tu portes.",
+"Le calme n'est pas l'absence de tempête, c'est la paix au milieu d'elle.",
+"Chaque difficulté porte en elle une facilité qui arrive."],
+  helplines:[
+    {label:'3114 — Prévention suicide (France)',sub:'24h/24, gratuit',href:'tel:3114'},
+    {label:'SOS Amitié — 09 72 39 40 50',sub:'Écoute anonyme',href:'tel:0972394050'},
+    {label:'Trouver une ligne dans ton pays',sub:'findahelpline.com — 175+ pays',href:'https://findahelpline.com'}]
+},
+en:{
+  appTitle:'Serene',
+  tabs:{chat:'Confide',breathe:'Breathe',journal:'Journal',resources:'Resources'},
+  intro:"You don't need to explain\nto deserve to be heard.\nSay what weighs on you.",
+  disclaimer:"This space is not a substitute for a healthcare professional. In serious distress, tap SOS.",
+  placeholder:'Tonight, I wanted to say…',
+  presence:'presence…',
+  errorMsg:"I'm here, but something got interrupted. Try again.",
+  breatheTitle:'Let\'s breathe together',
+  breatheSub:'A few minutes is enough to calm the body. Pick a rhythm and let yourself be guided.',
+  techniques:{coherence:{name:'Coherence 5-5',desc:'5s in, 5s out. The most validated rhythm to calm the nervous system.'},box:{name:'Box 4-4-4-4',desc:'Inhale, hold, exhale, hold. To regain focus.'},sleep:{name:'Sleep 4-7-8',desc:'In 4s, hold 7s, out 8s. To prepare for the night.'}},
+  phases:{inhale:'breathe in…',hold:'hold…',exhale:'breathe out…',rest:'rest…'},
+  start:'Begin',stop:'Stop',
+  jToday:'How do you feel today?',
+  moods:['Hard','Heavy','Neutral','Good','Bright'],
+  journalPlaceholder:"A few words about your day… or three things you feel grateful for.",
+  gratitudeHint:"Tip: noting what's going well, even small things, gently shifts the way you see.",
+  save:'Keep this trace',saved:'Kept ✓',jAudio:'Voice note',jAudioStop:'Stop',
+  chartTitle:'YOUR PATH — LAST 14 DAYS',
+  history:'Your traces',
+  emptyEntries:'No traces yet. The notebook is waiting.',
+  storageNote:'Everything stays on this device. Nothing leaves this space without you.',
+  delete:'delete',
+  resSounds:'Sounds to breathe with',
+  resLibrary:'To listen',librarySub:'Spoken poetry, gentle music — close your eyes and let it carry you.',libraryEmpty:'Nothing here yet. Soothing tracks are coming soon.',
+  tdTitle:'Add a track',tdName:'Track title',tdFile:'File',tdLink:'Link',tdPick:'Choose an audio file',tdUrl:'Audio link',tdLinkHint:'Direct MP3 or SoundCloud link. YouTube cannot be played as audio only.',tdCancel:'Cancel',tdSave:'Add',tdYTWarn:'YouTube links cannot be played here. Use an MP3 or SoundCloud.',
+  tdTypes:{poetry:'Poetry',music:'Gentle music',nature:'Nature',voice:'Voice'},adminOn:'Admin mode on',adminOff:'Admin mode off',
+  sounds:{rain:'Distant rain',wind:'Soft wind',deep:'Depth',night:'Quiet night'},
+  play:'listen',playing:'playing…',
+  resPoems:'Words that soothe',
+  resArt:'Contemplate',
+  resRefuge:'My refuges',
+  refugeHint:'Add your own images — a place, a face, a memory that soothes you. They stay on this device, yours alone.',
+  resQuote:'A thought',
+  another:'ANOTHER',
+  sosTitle:'You are not alone.',
+  sosText:'If you are going through something very hard, trained people can listen to you, right now, for free.',
+  sosBreathe:'Breathe together first',
+  sosBreatheSub:'2 minutes to let the wave come down',
+  sosClose:'Go back',
+  crisisTitle:'What you carry is heavy.',
+  crisisText:'You deserve real human support, now. These lines are free and confidential:',
+  artLabels:['Morning mist','Inner sea','Night garden','Golden glow','Quiet mountain'],
+  poems:[
+"What is heavy today\nwill not always be.\nSeasons change\neven within us.",
+"You have survived\nall of your worst days.\nThis one too\nwill pass.",
+"Patience is not waiting.\nIt is keeping the heart open\nwhile you wait.",
+"There is a peace\nthat depends on nothing —\nnot news, not people.\nIt waits for you within.",
+"You are not what happened to you.\nYou are what you choose\nto become,\none morning at a time."],
+  quotes:[
+"What you cannot change, set it down. Your shoulders were made for your day, not for the world.",
+"Gratitude turns what we have into enough.",
+"The trial passing through you is also building you.",
+"Be gentle with yourself. You are doing your best with what you carry.",
+"Calm is not the absence of the storm. It is peace in the middle of it.",
+"Within every hardship, an ease is already on its way."],
+  helplines:[
+    {label:'988 — Suicide & Crisis Lifeline (US)',sub:'24/7, free',href:'tel:988'},
+    {label:'Samaritans — 116 123 (UK & IE)',sub:'Free, confidential',href:'tel:116123'},
+    {label:'Find a helpline in your country',sub:'findahelpline.com — 175+ countries',href:'https://findahelpline.com'}]
+},
+ar:{
+  appTitle:'سكينة',
+  tabs:{chat:'بُح بما في قلبك',breathe:'تنفّس',journal:'دفتري',resources:'موارد'},
+  intro:"لست بحاجة إلى التفسير\nلتستحق أن يُسمع صوتك.\nقل ما يثقل عليك.",
+  disclaimer:"هذه المساحة ليست بديلاً عن مختص. في حال الضيق الشديد، اضغط SOS.",
+  placeholder:'الليلة، أردت أن أقول…',
+  presence:'حضور…',
+  errorMsg:'أنا هنا، لكن شيئًا ما انقطع. حاول مرة أخرى.',
+  breatheTitle:'لنتنفّس معًا',
+  breatheSub:'دقائق قليلة تكفي لتهدئة الجسد. اختر إيقاعًا ودع نفسك تنقاد.',
+  techniques:{coherence:{name:'توازن ٥-٥',desc:'٥ ثوانٍ شهيق، ٥ ثوانٍ زفير. الإيقاع الأكثر فعالية لتهدئة الجهاز العصبي.'},box:{name:'مربّع ٤-٤-٤-٤',desc:'شهيق، حبس، زفير، حبس. لاستعادة التركيز.'},sleep:{name:'نوم ٤-٧-٨',desc:'شهيق ٤، حبس ٧، زفير ٨. للاستعداد لليل.'}},
+  phases:{inhale:'شهيق…',hold:'احبس…',exhale:'زفير…',rest:'استرح…'},
+  start:'ابدأ',stop:'توقف',
+  jToday:'كيف تشعر اليوم؟',
+  moods:['صعب','ثقيل','عادي','جيد','مشرق'],
+  journalPlaceholder:'كلمات قليلة عن يومك… أو ثلاثة أشياء تشعر بالامتنان لها.',
+  gratitudeHint:'نصيحة: تدوين ما هو جيد، حتى الأشياء الصغيرة، يغيّر النظرة بلطف.',
+  save:'احفظ هذا الأثر',saved:'تم الحفظ ✓',jAudio:'ملاحظة صوتية',jAudioStop:'توقف',
+  chartTitle:'مسارك — آخر ١٤ يومًا',
+  history:'آثارك',
+  emptyEntries:'لا آثار بعد. الدفتر بانتظارك.',
+  storageNote:'كل شيء يبقى على هذا الجهاز. لا شيء يغادر هذه المساحة من دونك.',
+  delete:'حذف',
+  resSounds:'أصوات للتنفّس',
+  resLibrary:'للاستماع',librarySub:'شعر منطوق، موسيقى هادئة — أغمض عينيك ودعها تحملك.',libraryEmpty:'لا شيء هنا بعد. مقاطع مهدئة قريبًا.',
+  tdTitle:'إضافة مقطع',tdName:'عنوان المقطع',tdFile:'ملف',tdLink:'رابط',tdPick:'اختر ملف صوتي',tdUrl:'رابط صوتي',tdLinkHint:'رابط MP3 مباشر أو SoundCloud. يوتيوب لا يعمل كصوت فقط.',tdCancel:'إلغاء',tdSave:'إضافة',tdYTWarn:'روابط يوتيوب لا يمكن تشغيلها هنا.',
+  tdTypes:{poetry:'شعر',music:'موسيقى هادئة',nature:'طبيعة',voice:'صوت'},adminOn:'وضع المشرف مفعّل',adminOff:'وضع المشرف معطّل',
+  sounds:{rain:'مطر بعيد',wind:'ريح لطيفة',deep:'عمق',night:'ليل هادئ'},
+  play:'استمع',playing:'يُشغَّل…',
+  resPoems:'كلمات تُهدّئ',
+  resArt:'تأمّل',
+  resRefuge:'ملاذاتي',
+  refugeHint:'أضف صورك الخاصة — مكان، وجه، أو ذكرى تهدئك. تبقى على هذا الجهاز، لك وحدك.',
+  resQuote:'خاطرة',
+  another:'أخرى',
+  sosTitle:'لست وحدك.',
+  sosText:'إذا كنت تمر بلحظة صعبة جدًا، هناك أشخاص مدرّبون للاستماع إليك، الآن، مجانًا.',
+  sosBreathe:'لنتنفّس معًا أولًا',
+  sosBreatheSub:'دقيقتان لتهدئة الموجة',
+  sosClose:'عودة',
+  crisisTitle:'ما تحمله ثقيل.',
+  crisisText:'تستحق دعمًا إنسانيًا حقيقيًا، الآن. هذه الخطوط مجانية وسرية:',
+  artLabels:['ضباب الصباح','بحر داخلي','حديقة الليل','وهج ذهبي','جبل هادئ'],
+  poems:[
+"ما هو ثقيل اليوم\nلن يبقى كذلك دائمًا.\nالفصول تتغيّر\nحتى في داخلنا.",
+"لقد نجوت\nمن كل أيامك الأسوأ.\nوهذا اليوم أيضًا\nسيمضي.",
+"الصبر ليس الانتظار.\nبل إبقاء القلب مفتوحًا\nبينما تنتظر.",
+"هناك سلام\nلا يعتمد على شيء —\nلا الأخبار ولا الناس،\nينتظرك في الداخل.",
+"أنت لست ما حدث لك.\nأنت ما تختار\nأن تصبح،\nصباحًا بعد صباح."],
+  quotes:[
+"ما لا تستطيع تغييره، ضعه أرضًا. كتفاك خُلقتا ليومك، لا للعالم كله.",
+"الامتنان يحوّل ما نملكه إلى كفاية.",
+"المحنة التي تعبرك تبنيك أيضًا.",
+"كن لطيفًا مع نفسك. أنت تبذل وسعك بما تحمله.",
+"الهدوء ليس غياب العاصفة، بل السلام في وسطها.",
+"مع كل عسرٍ، يسرٌ في الطريق."],
+  helplines:[
+    {label:'ابحث عن خط مساعدة في بلدك',sub:'findahelpline.com — أكثر من ١٧٥ دولة',href:'https://findahelpline.com'},
+    {label:'Befrienders Worldwide',sub:'شبكة عالمية للاستماع',href:'https://befrienders.org'}]
+},
+es:{
+  appTitle:'Serena',
+  tabs:{chat:'Confiarse',breathe:'Respirar',journal:'Diario',resources:'Recursos'},
+  intro:"No necesitas explicar\npara merecer ser escuchado.\nDi lo que te pesa.",
+  disclaimer:"Este espacio no sustituye a un profesional de salud. En caso de angustia grave, toca SOS.",
+  placeholder:'Esta noche quería decir que…',
+  presence:'presencia…',
+  errorMsg:'Estoy aquí, pero algo se interrumpió. Inténtalo de nuevo.',
+  breatheTitle:'Respiremos juntos',
+  breatheSub:'Unos minutos bastan para calmar el cuerpo. Elige un ritmo y déjate guiar.',
+  techniques:{coherence:{name:'Coherencia 5-5',desc:'5s inhala, 5s exhala. El ritmo más validado para calmar el sistema nervioso.'},box:{name:'Caja 4-4-4-4',desc:'Inhala, retén, exhala, retén. Para recuperar el enfoque.'},sleep:{name:'Sueño 4-7-8',desc:'Inhala 4s, retén 7s, exhala 8s. Para preparar la noche.'}},
+  phases:{inhale:'inhala…',hold:'retén…',exhale:'exhala…',rest:'pausa…'},
+  start:'Comenzar',stop:'Detener',
+  jToday:'¿Cómo te sientes hoy?',
+  moods:['Difícil','Pesado','Neutro','Bien','Luminoso'],
+  journalPlaceholder:'Unas palabras sobre tu día… o tres cosas por las que te sientes agradecido.',
+  gratitudeHint:'Consejo: anotar lo que va bien, incluso lo pequeño, cambia suavemente la mirada.',
+  save:'Guardar esta huella',saved:'Guardado ✓',jAudio:'Nota de voz',jAudioStop:'Detener',
+  chartTitle:'TU CAMINO — ÚLTIMOS 14 DÍAS',
+  history:'Tus huellas',
+  emptyEntries:'Aún no hay huellas. El cuaderno te espera.',
+  storageNote:'Todo permanece en este dispositivo. Nada sale de este espacio sin ti.',
+  delete:'borrar',
+  resSounds:'Sonidos para respirar',
+  resLibrary:'Para escuchar',librarySub:'Poesía hablada, música suave — cierra los ojos y déjate llevar.',libraryEmpty:'Aún no hay nada. Pronto llegarán pistas relajantes.',
+  tdTitle:'Añadir una pista',tdName:'Título de la pista',tdFile:'Archivo',tdLink:'Enlace',tdPick:'Elegir un archivo de audio',tdUrl:'Enlace de audio',tdLinkHint:'Enlace MP3 directo o SoundCloud. YouTube no se reproduce solo en audio.',tdCancel:'Cancelar',tdSave:'Añadir',tdYTWarn:'Los enlaces de YouTube no se pueden reproducir aquí.',
+  tdTypes:{poetry:'Poesía',music:'Música suave',nature:'Naturaleza',voice:'Voz'},adminOn:'Modo admin activado',adminOff:'Modo admin desactivado',
+  sounds:{rain:'Lluvia lejana',wind:'Viento suave',deep:'Profundidad',night:'Noche tranquila'},
+  play:'escuchar',playing:'sonando…',
+  resPoems:'Palabras que calman',
+  resArt:'Contemplar',
+  resRefuge:'Mis refugios',
+  refugeHint:'Añade tus propias imágenes — un lugar, un rostro, un recuerdo que te calme. Quedan en este dispositivo, solo para ti.',
+  resQuote:'Un pensamiento',
+  another:'OTRA',
+  sosTitle:'No estás solo.',
+  sosText:'Si atraviesas un momento muy difícil, hay personas formadas para escucharte, ahora, gratis.',
+  sosBreathe:'Respirar juntos primero',
+  sosBreatheSub:'2 minutos para que baje la ola',
+  sosClose:'Volver',
+  crisisTitle:'Lo que cargas es pesado.',
+  crisisText:'Mereces apoyo humano real, ahora. Estas líneas son gratuitas y confidenciales:',
+  artLabels:['Bruma matinal','Mar interior','Jardín nocturno','Resplandor dorado','Montaña serena'],
+  poems:[
+"Lo que hoy pesa\nno pesará siempre.\nLas estaciones cambian\nincluso dentro de nosotros.",
+"Has sobrevivido\na todos tus peores días.\nEste también\npasará.",
+"La paciencia no es esperar.\nEs mantener el corazón abierto\nmientras esperas.",
+"Hay una paz\nque no depende de nada —\nni de noticias ni de gente.\nTe espera adentro.",
+"No eres lo que te pasó.\nEres lo que eliges\nllegar a ser,\nuna mañana a la vez."],
+  quotes:[
+"Lo que no puedes cambiar, suéltalo. Tus hombros fueron hechos para tu día, no para el mundo.",
+"La gratitud convierte lo que tenemos en suficiente.",
+"La prueba que te atraviesa también te está construyendo.",
+"Sé amable contigo. Haces lo mejor que puedes con lo que cargas.",
+"La calma no es la ausencia de tormenta, es la paz en medio de ella.",
+"Dentro de cada dificultad, una facilidad ya viene en camino."],
+  helplines:[
+    {label:'024 — Línea de atención (España)',sub:'24h, gratuito',href:'tel:024'},
+    {label:'Encuentra una línea en tu país',sub:'findahelpline.com — 175+ países',href:'https://findahelpline.com'}]
+},
+pt:{
+  appTitle:'Serena',
+  tabs:{chat:'Desabafar',breathe:'Respirar',journal:'Diário',resources:'Recursos'},
+  intro:"Você não precisa explicar\npara merecer ser ouvido.\nDiga o que pesa.",
+  disclaimer:"Este espaço não substitui um profissional de saúde. Em sofrimento grave, toque em SOS.",
+  placeholder:'Hoje à noite, eu queria dizer que…',
+  presence:'presença…',
+  errorMsg:'Estou aqui, mas algo foi interrompido. Tente novamente.',
+  breatheTitle:'Vamos respirar juntos',
+  breatheSub:'Alguns minutos bastam para acalmar o corpo. Escolha um ritmo e deixe-se guiar.',
+  techniques:{coherence:{name:'Coerência 5-5',desc:'5s inspira, 5s expira. O ritmo mais validado para acalmar o sistema nervoso.'},box:{name:'Caixa 4-4-4-4',desc:'Inspira, segura, expira, segura. Para recuperar o foco.'},sleep:{name:'Sono 4-7-8',desc:'Inspira 4s, segura 7s, expira 8s. Para preparar a noite.'}},
+  phases:{inhale:'inspire…',hold:'segure…',exhale:'expire…',rest:'pausa…'},
+  start:'Começar',stop:'Parar',
+  jToday:'Como você se sente hoje?',
+  moods:['Difícil','Pesado','Neutro','Bem','Luminoso'],
+  journalPlaceholder:'Algumas palavras sobre o seu dia… ou três coisas pelas quais você é grato.',
+  gratitudeHint:'Dica: anotar o que vai bem, mesmo as pequenas coisas, muda suavemente o olhar.',
+  save:'Guardar este traço',saved:'Guardado ✓',jAudio:'Nota de voz',jAudioStop:'Parar',
+  chartTitle:'SEU CAMINHO — ÚLTIMOS 14 DIAS',
+  history:'Seus traços',
+  emptyEntries:'Nenhum traço ainda. O caderno espera por você.',
+  storageNote:'Tudo fica neste dispositivo. Nada sai deste espaço sem você.',
+  delete:'apagar',
+  resSounds:'Sons para respirar',
+  resLibrary:'Para ouvir',librarySub:'Poesia falada, músicas suaves — feche os olhos e deixe-se levar.',libraryEmpty:'Nada aqui ainda. Faixas relaxantes em breve.',
+  tdTitle:'Adicionar uma faixa',tdName:'Título da faixa',tdFile:'Arquivo',tdLink:'Link',tdPick:'Escolher um arquivo de áudio',tdUrl:'Link de áudio',tdLinkHint:'Link MP3 direto ou SoundCloud. YouTube não toca só em áudio.',tdCancel:'Cancelar',tdSave:'Adicionar',tdYTWarn:'Links do YouTube não podem ser reproduzidos aqui.',
+  tdTypes:{poetry:'Poesia',music:'Música suave',nature:'Natureza',voice:'Voz'},adminOn:'Modo admin ativado',adminOff:'Modo admin desativado',
+  sounds:{rain:'Chuva distante',wind:'Vento suave',deep:'Profundidade',night:'Noite calma'},
+  play:'ouvir',playing:'tocando…',
+  resPoems:'Palavras que acalmam',
+  resArt:'Contemplar',
+  resRefuge:'Meus refúgios',
+  refugeHint:'Adicione suas próprias imagens — um lugar, um rosto, uma memória que te acalma. Ficam neste dispositivo, só suas.',
+  resQuote:'Um pensamento',
+  another:'OUTRA',
+  sosTitle:'Você não está sozinho.',
+  sosText:'Se você está passando por um momento muito difícil, há pessoas treinadas para te ouvir, agora, de graça.',
+  sosBreathe:'Respirar juntos primeiro',
+  sosBreatheSub:'2 minutos para a onda baixar',
+  sosClose:'Voltar',
+  crisisTitle:'O que você carrega é pesado.',
+  crisisText:'Você merece apoio humano de verdade, agora. Estas linhas são gratuitas e confidenciais:',
+  artLabels:['Névoa da manhã','Mar interior','Jardim noturno','Brilho dourado','Montanha serena'],
+  poems:[
+"O que pesa hoje\nnão pesará para sempre.\nAs estações mudam\naté dentro de nós.",
+"Você sobreviveu\na todos os seus piores dias.\nEste também\nvai passar.",
+"Paciência não é esperar.\nÉ manter o coração aberto\nenquanto se espera.",
+"Há uma paz\nque não depende de nada —\nnem de notícias, nem de pessoas.\nEla te espera por dentro.",
+"Você não é o que te aconteceu.\nVocê é o que escolhe\nse tornar,\numa manhã de cada vez."],
+  quotes:[
+"O que você não pode mudar, deixe no chão. Seus ombros foram feitos para o seu dia, não para o mundo.",
+"A gratidão transforma o que temos em suficiente.",
+"A provação que te atravessa também está te construindo.",
+"Seja gentil consigo. Você está fazendo o melhor com o que carrega.",
+"A calma não é a ausência da tempestade, é a paz no meio dela.",
+"Dentro de cada dificuldade, uma facilidade já está a caminho."],
+  helplines:[
+    {label:'CVV — 188 (Brasil)',sub:'24h, gratuito',href:'tel:188'},
+    {label:'Encontre uma linha no seu país',sub:'findahelpline.com — 175+ países',href:'https://findahelpline.com'}]
+},
+ja:{
+  appTitle:'静けさ',
+  tabs:{chat:'打ち明ける',breathe:'呼吸する',journal:'日記',resources:'リソース'},
+  intro:"説明しなくていい。\nあなたの声は聴かれるに値する。\n重いものを、言葉にして。",
+  disclaimer:"この場は専門家の代わりにはなりません。深刻な苦しみの時は SOS をタップしてください。",
+  placeholder:'今夜、言いたかったのは…',
+  presence:'そばにいます…',
+  errorMsg:'ここにいますが、何かが途切れました。もう一度試してください。',
+  breatheTitle:'一緒に呼吸しましょう',
+  breatheSub:'数分で体は落ち着きます。リズムを選んで、導かれてください。',
+  techniques:{coherence:{name:'コヒーレンス 5-5',desc:'5秒吸って、5秒吐く。神経系を落ち着かせる最も検証されたリズム。'},box:{name:'ボックス 4-4-4-4',desc:'吸う、止める、吐く、止める。集中を取り戻すために。'},sleep:{name:'睡眠 4-7-8',desc:'4秒吸い、7秒止め、8秒吐く。夜の準備に。'}},
+  phases:{inhale:'吸って…',hold:'止めて…',exhale:'吐いて…',rest:'休んで…'},
+  start:'始める',stop:'止める',
+  jToday:'今日はどんな気分ですか？',
+  moods:['つらい','重い','普通','良い','明るい'],
+  journalPlaceholder:'今日のことを少し… または感謝している3つのこと。',
+  gratitudeHint:'ヒント：小さなことでも、良かったことを書くと、見方が静かに変わります。',
+  save:'この跡を残す',saved:'保存しました ✓',jAudio:'音声メモ',jAudioStop:'停止',
+  chartTitle:'あなたの道 — 直近14日間',
+  history:'あなたの跡',
+  emptyEntries:'まだ跡はありません。ノートが待っています。',
+  storageNote:'すべてこの端末に残ります。あなたなしで、何もここを離れません。',
+  delete:'削除',
+  resSounds:'呼吸のための音',
+  resLibrary:'聴く',librarySub:'語りの詩、穏やかな音楽 — 目を閉じて、身を任せて。',libraryEmpty:'まだ何もありません。安らぎの音がまもなく届きます。',
+  tdTitle:'トラックを追加',tdName:'トラック名',tdFile:'ファイル',tdLink:'リンク',tdPick:'音声ファイルを選ぶ',tdUrl:'音声リンク',tdLinkHint:'直接MP3またはSoundCloudリンク。YouTubeは音声のみで再生できません。',tdCancel:'キャンセル',tdSave:'追加',tdYTWarn:'YouTubeリンクはここで再生できません。',
+  tdTypes:{poetry:'詩',music:'穏やかな音楽',nature:'自然',voice:'声'},adminOn:'管理者モード ON',adminOff:'管理者モード OFF',
+  sounds:{rain:'遠い雨',wind:'やわらかな風',deep:'深み',night:'静かな夜'},
+  play:'聴く',playing:'再生中…',
+  resPoems:'心を鎮める言葉',
+  resArt:'眺める',
+  resRefuge:'わたしの逸り場',
+  refugeHint:'あなた自身の画像を追加 — 場所、顔、心を静める思い出。この端末にだけ残ります。',
+  resQuote:'ひとつの想い',
+  another:'別の言葉',
+  sosTitle:'あなたは一人ではない。',
+  sosText:'とてもつらい時、訓練を受けた人があなたの話を、今すぐ、無料で聴いてくれます。',
+  sosBreathe:'まず一緒に呼吸を',
+  sosBreatheSub:'2分間、波が引くまで',
+  sosClose:'戻る',
+  crisisTitle:'あなたが抱えているものは重い。',
+  crisisText:'あなたは本当の人間の支えを受けるに値します。これらの窓口は無料で秘密が守られます：',
+  artLabels:['朝霧','内なる海','夜の庭','金色の光','静かな山'],
+  poems:[
+"今日重いものが\nずっと重いわけではない。\n季節は変わる\n私たちの中でも。",
+"あなたは生き延びてきた\n最悪の日々のすべてを。\n今日もまた\n過ぎていく。",
+"忍耐とは待つことではない。\n待ちながら\n心を開いたままにすること。",
+"何にも依らない\n平安がある —\nニュースにも、人にも。\nそれは内側で待っている。",
+"あなたは起きたことではない。\nあなたは選んでいく存在。\n一つの朝ずつ、\nなっていくもの。"],
+  quotes:[
+"変えられないものは、置いていい。あなたの肩は一日のためにあり、世界のためではない。",
+"感謝は、今あるものを「十分」に変える。",
+"あなたを通り抜ける試練は、あなたを築いてもいる。",
+"自分にやさしく。あなたは抱えているもので精一杯やっている。",
+"静けさとは嵐がないことではなく、嵐の中の平和のこと。",
+"どんな困難の中にも、安らぎがすでに向かっている。"],
+  helplines:[
+    {label:'いのちの電話 — 0570-783-556',sub:'毎日対応',href:'tel:0570783556'},
+    {label:'あなたの国の窓口を探す',sub:'findahelpline.com',href:'https://findahelpline.com'}]
+},
+ur:{
+  appTitle:'سکون',
+  tabs:{chat:'دل کی بات',breathe:'سانس',journal:'ڈائری',resources:'وسائل'},
+  intro:"سنے جانے کے لیے\nوضاحت ضروری نہیں۔\nجو بوجھ ہے، کہہ دو۔",
+  disclaimer:"یہ جگہ کسی ماہر کا متبادل نہیں۔ شدید پریشانی میں SOS دبائیں۔",
+  placeholder:'آج رات، میں کہنا چاہتا تھا…',
+  presence:'موجودگی…',
+  errorMsg:'میں یہاں ہوں، مگر کچھ رک گیا۔ دوبارہ کوشش کریں۔',
+  breatheTitle:'آئیں ساتھ سانس لیں',
+  breatheSub:'چند منٹ جسم کو پرسکون کرنے کے لیے کافی ہیں۔ ایک تال چنیں اور خود کو رہنمائی دیں۔',
+  techniques:{coherence:{name:'توازن ۵-۵',desc:'۵ سیکنڈ اندر، ۵ سیکنڈ باہر۔ اعصابی نظام کو پرسکون کرنے کا سب سے مؤثر طریقہ۔'},box:{name:'مربع ۴-۴-۴-۴',desc:'سانس لیں، روکیں، چھوڑیں، روکیں۔ توجہ واپس لانے کے لیے۔'},sleep:{name:'نیند ۴-۷-۸',desc:'۴ سیکنڈ اندر، ۷ روکیں، ۸ باہر۔ رات کی تیاری کے لیے۔'}},
+  phases:{inhale:'سانس لیں…',hold:'روکیں…',exhale:'چھوڑیں…',rest:'آرام…'},
+  start:'شروع کریں',stop:'روکیں',
+  jToday:'آج آپ کیسا محسوس کر رہے ہیں؟',
+  moods:['مشکل','بھاری','عام','اچھا','روشن'],
+  journalPlaceholder:'اپنے دن کے بارے میں چند الفاظ… یا تین چیزیں جن کے لیے آپ شکرگزار ہیں۔',
+  gratitudeHint:'مشورہ: جو اچھا ہے اسے لکھنا، چھوٹی چیزیں بھی، نظر کو آہستہ آہستہ بدل دیتا ہے۔',
+  save:'یہ نشان محفوظ کریں',saved:'محفوظ ✓',jAudio:'صوتی نوٹ',jAudioStop:'روکیں',
+  chartTitle:'آپ کا راستہ — آخری ۱۴ دن',
+  history:'آپ کے نشانات',
+  emptyEntries:'ابھی کوئی نشان نہیں۔ ڈائری آپ کا انتظار کر رہی ہے۔',
+  storageNote:'سب کچھ اسی آلے پر رہتا ہے۔ آپ کے بغیر کچھ بھی یہاں سے نہیں جاتا۔',
+  delete:'حذف',
+  resSounds:'سانس کے لیے آوازیں',
+  resLibrary:'سننے کے لیے',librarySub:'بولی گئی شاعری، نرم موسیقی — آنکھیں بند کریں اور خود کو بہنے دیں۔',libraryEmpty:'ابھی یہاں کچھ نہیں۔ پرسکون ترکیبیں جلد آ رہی ہیں۔',
+  tdTitle:'ٹریک شامل کریں',tdName:'ٹریک کا عنوان',tdFile:'فائل',tdLink:'لنک',tdPick:'آڈیو فائل چنیں',tdUrl:'آڈیو لنک',tdLinkHint:'براہ راست MP3 یا SoundCloud لنک۔ یوٹیوب صرف آڈیو کے طور پر نہیں چلتا۔',tdCancel:'منسوخ',tdSave:'شامل کریں',tdYTWarn:'یوٹیوب لنکس یہاں نہیں چل سکتے۔',
+  tdTypes:{poetry:'شاعری',music:'نرم موسیقی',nature:'فطرت',voice:'آواز'},adminOn:'ایڈمن موڈ آن',adminOff:'ایڈمن موڈ آف',
+  sounds:{rain:'دور کی بارش',wind:'نرم ہوا',deep:'گہرائی',night:'پرسکون رات'},
+  play:'سنیں',playing:'چل رہا ہے…',
+  resPoems:'سکون دینے والے الفاظ',
+  resArt:'غور کریں',
+  resRefuge:'میری پناہ گاہیں',
+  refugeHint:'اپنی تصاویر شامل کریں — کوئی جگہ، چہرہ، یا یاد جو آپ کو سکون دے۔ یہ اسی آلے پر رہتی ہیں، صرف آپ کی۔',
+  resQuote:'ایک خیال',
+  another:'ایک اور',
+  sosTitle:'آپ اکیلے نہیں ہیں۔',
+  sosText:'اگر آپ بہت مشکل وقت سے گزر رہے ہیں تو تربیت یافتہ لوگ آپ کی بات سننے کے لیے موجود ہیں، ابھی، مفت۔',
+  sosBreathe:'پہلے ساتھ سانس لیں',
+  sosBreatheSub:'۲ منٹ لہر کو اترنے دیں',
+  sosClose:'واپس',
+  crisisTitle:'جو آپ اٹھائے ہوئے ہیں وہ بھاری ہے۔',
+  crisisText:'آپ حقیقی انسانی سہارے کے مستحق ہیں، ابھی۔ یہ لائنیں مفت اور رازدارانہ ہیں:',
+  artLabels:['صبح کی دھند','اندرونی سمندر','رات کا باغ','سنہری روشنی','پرسکون پہاڑ'],
+  poems:[
+"جو آج بھاری ہے\nہمیشہ بھاری نہیں رہے گا۔\nموسم بدلتے ہیں\nہمارے اندر بھی۔",
+"تم بچ نکلے ہو\nاپنے تمام بدترین دنوں سے۔\nیہ دن بھی\nگزر جائے گا۔",
+"صبر انتظار نہیں۔\nیہ دل کو کھلا رکھنا ہے\nانتظار کے دوران۔",
+"ایک سکون ہے\nجو کسی چیز پر منحصر نہیں —\nنہ خبروں پر، نہ لوگوں پر۔\nوہ اندر تمہارا منتظر ہے۔",
+"تم وہ نہیں جو تمہارے ساتھ ہوا۔\nتم وہ ہو جو تم بننا\nچنتے ہو،\nایک صبح کے بعد ایک صبح۔"],
+  quotes:[
+"جو تم بدل نہیں سکتے، اسے رکھ دو۔ تمہارے کندھے تمہارے دن کے لیے بنے ہیں، دنیا کے لیے نہیں۔",
+"شکر جو ہمارے پاس ہے اسے کافی بنا دیتا ہے۔",
+"جو آزمائش تم سے گزر رہی ہے وہ تمہیں بنا بھی رہی ہے۔",
+"خود سے نرمی کرو۔ تم اپنے بوجھ کے ساتھ اپنی پوری کوشش کر رہے ہو۔",
+"سکون طوفان کی غیر موجودگی نہیں، اس کے بیچ میں امن ہے۔",
+"ہر مشکل کے اندر، ایک آسانی پہلے سے راستے میں ہے۔"],
+  helplines:[
+    {label:'Umang Pakistan — 0311-7786264',sub:'مفت، رازدارانہ',href:'tel:03117786264'},
+    {label:'اپنے ملک میں ہیلپ لائن تلاش کریں',sub:'findahelpline.com',href:'https://findahelpline.com'}]
+},
+sw:{
+  appTitle:'Utulivu',
+  tabs:{chat:'Fungua moyo',breathe:'Pumua',journal:'Shajara',resources:'Rasilimali'},
+  intro:"Huhitaji kueleza\nili ustahili kusikilizwa.\nSema kinachokulemea.",
+  disclaimer:"Nafasi hii si mbadala wa mtaalamu wa afya. Ukiwa na dhiki kubwa, gusa SOS.",
+  placeholder:'Usiku huu, nilitaka kusema…',
+  presence:'uwepo…',
+  errorMsg:'Nipo hapa, lakini kitu kilikatika. Jaribu tena.',
+  breatheTitle:'Tupumue pamoja',
+  breatheSub:'Dakika chache zinatosha kutuliza mwili. Chagua mdundo, ujiache uongozwe.',
+  techniques:{coherence:{name:'Mlinganyo 5-5',desc:'Sekunde 5 ndani, 5 nje. Mdundo uliothibitishwa zaidi kutuliza mfumo wa neva.'},box:{name:'Mraba 4-4-4-4',desc:'Vuta, shikilia, toa, shikilia. Kurudisha umakini.'},sleep:{name:'Usingizi 4-7-8',desc:'Vuta 4, shikilia 7, toa 8. Kujiandaa na usiku.'}},
+  phases:{inhale:'vuta pumzi…',hold:'shikilia…',exhale:'toa pumzi…',rest:'pumzika…'},
+  start:'Anza',stop:'Simamisha',
+  jToday:'Unajisikiaje leo?',
+  moods:['Ngumu','Nzito','Kawaida','Nzuri','Angavu'],
+  journalPlaceholder:'Maneno machache kuhusu siku yako… au vitu vitatu unavyoshukuru.',
+  gratitudeHint:'Dokezo: kuandika yanayoenda vizuri, hata madogo, hubadilisha mtazamo taratibu.',
+  save:'Hifadhi alama hii',saved:'Imehifadhiwa ✓',jAudio:'Noti ya sauti',jAudioStop:'Simamisha',
+  chartTitle:'NJIA YAKO — SIKU 14 ZILIZOPITA',
+  history:'Alama zako',
+  emptyEntries:'Hakuna alama bado. Daftari linakusubiri.',
+  storageNote:'Kila kitu kinabaki kwenye kifaa hiki. Hakuna kinachoondoka bila wewe.',
+  delete:'futa',
+  resSounds:'Sauti za kupumua',
+  resLibrary:'Kusikiliza',librarySub:'Mashairi yanayosemwa, muziki laini — funga macho na ujiache ubebwe.',libraryEmpty:'Bado hakuna kitu hapa. Nyimbo za kutuliza zinakuja hivi karibuni.',
+  tdTitle:'Ongeza wimbo',tdName:'Kichwa cha wimbo',tdFile:'Faili',tdLink:'Kiungo',tdPick:'Chagua faili ya sauti',tdUrl:'Kiungo cha sauti',tdLinkHint:'Kiungo cha moja kwa moja cha MP3 au SoundCloud. YouTube haichezi kama sauti pekee.',tdCancel:'Ghairi',tdSave:'Ongeza',tdYTWarn:'Viungo vya YouTube haviwezi kuchezwa hapa.',
+  tdTypes:{poetry:'Mashairi',music:'Muziki laini',nature:'Asili',voice:'Sauti'},adminOn:'Hali ya msimamizi imewashwa',adminOff:'Hali ya msimamizi imezimwa',
+  sounds:{rain:'Mvua ya mbali',wind:'Upepo mwanana',deep:'Kina',night:'Usiku tulivu'},
+  play:'sikiliza',playing:'inacheza…',
+  resPoems:'Maneno yanayotuliza',
+  resArt:'Tafakari',
+  resRefuge:'Makimbilio yangu',
+  refugeHint:'Ongeza picha zako mwenyewe — mahali, uso, au kumbukumbu inayokutuliza. Zinabaki kwenye kifaa hiki, zako pekee.',
+  resQuote:'Wazo moja',
+  another:'JINGINE',
+  sosTitle:'Hauko peke yako.',
+  sosText:'Ukiwa unapitia wakati mgumu sana, kuna watu waliofunzwa kukusikiliza, sasa hivi, bure.',
+  sosBreathe:'Tupumue pamoja kwanza',
+  sosBreatheSub:'Dakika 2 wimbi lipungue',
+  sosClose:'Rudi',
+  crisisTitle:'Unachobeba ni kizito.',
+  crisisText:'Unastahili msaada wa kweli wa kibinadamu, sasa. Nambari hizi ni bure na za siri:',
+  artLabels:['Ukungu wa asubuhi','Bahari ya ndani','Bustani ya usiku','Mwanga wa dhahabu','Mlima tulivu'],
+  poems:[
+"Kilicho kizito leo\nhakitabaki kizito milele.\nMisimu hubadilika\nhata ndani yetu.",
+"Umenusurika\nsiku zako zote mbaya zaidi.\nHii pia\nitapita.",
+"Subira si kusubiri.\nNi kuweka moyo wazi\nunaposubiri.",
+"Kuna amani\nisiyotegemea kitu —\nsi habari, si watu.\nInakusubiri ndani.",
+"Wewe si kilichokupata.\nWewe ni unachochagua\nkuwa,\nasubuhi moja baada ya nyingine."],
+  quotes:[
+"Usichoweza kubadilisha, kiweke chini. Mabega yako yameumbwa kwa siku yako, si kwa dunia.",
+"Shukrani hugeuza tulichonacho kuwa cha kutosha.",
+"Jaribu linalokupitia pia linakujenga.",
+"Kuwa mpole na nafsi yako. Unafanya kadri uwezavyo na unachobeba.",
+"Utulivu si kukosekana kwa dhoruba, ni amani katikati yake.",
+"Ndani ya kila ugumu, wepesi tayari unakuja."],
+  helplines:[
+    {label:'Befrienders Kenya — 0722 178 177',sub:'Bure, siri',href:'tel:0722178177'},
+    {label:'Tafuta nambari ya msaada nchini mwako',sub:'findahelpline.com',href:'https://findahelpline.com'}]
+}
+};
+
+/* ================= VOICE I18N + LOCALES ================= */
+const SPEECH_LOCALE = {fr:'fr-FR',en:'en-US',ar:'ar-SA',es:'es-ES',pt:'pt-BR',ja:'ja-JP',ur:'ur-PK',sw:'sw-KE'};
+const VOICE_T = {
+  fr:{micTitle:'Message vocal',voiceMode:'Mode dialogue à voix haute',vStart:'Touche pour parler',vListening:'Je t\'écoute…',vThinking:'…',vSpeaking:'',vTap:'Parler',vStop:'Arrêter',vTapAgain:'Touche pour répondre',vUnsupported:'La voix n\'est pas disponible sur ce navigateur.',vMicDenied:'Accès au micro refusé. Autorise-le dans les réglages.',vNoTranscript:'Je n\'ai pas pu transcrire le message. Tu peux réessayer ou écrire.'},
+  en:{micTitle:'Voice message',voiceMode:'Spoken dialogue mode',vStart:'Tap to speak',vListening:'I\'m listening…',vThinking:'…',vSpeaking:'',vTap:'Speak',vStop:'Stop',vTapAgain:'Tap to reply',vUnsupported:'Voice is not available on this browser.',vMicDenied:'Microphone access denied. Allow it in settings.',vNoTranscript:'I couldn\'t transcribe that. You can try again or type.'},
+  ar:{micTitle:'رسالة صوتية',voiceMode:'وضع الحوار الصوتي',vStart:'المس لتتحدث',vListening:'أنا أستمع…',vThinking:'…',vSpeaking:'',vTap:'تحدّث',vStop:'توقف',vTapAgain:'المس للرد',vUnsupported:'الصوت غير متاح على هذا المتصفح.',vMicDenied:'تم رفض الوصول إلى الميكروفون. اسمح به في الإعدادات.',vNoTranscript:'لم أتمكن من تحويل الرسالة إلى نص. حاول مجددًا أو اكتب.'},
+  es:{micTitle:'Mensaje de voz',voiceMode:'Modo diálogo en voz alta',vStart:'Toca para hablar',vListening:'Te escucho…',vThinking:'…',vSpeaking:'',vTap:'Hablar',vStop:'Detener',vTapAgain:'Toca para responder',vUnsupported:'La voz no está disponible en este navegador.',vMicDenied:'Acceso al micrófono denegado. Permítelo en ajustes.',vNoTranscript:'No pude transcribir eso. Inténtalo de nuevo o escribe.'},
+  pt:{micTitle:'Mensagem de voz',voiceMode:'Modo de diálogo por voz',vStart:'Toque para falar',vListening:'Estou ouvindo…',vThinking:'…',vSpeaking:'',vTap:'Falar',vStop:'Parar',vTapAgain:'Toque para responder',vUnsupported:'A voz não está disponível neste navegador.',vMicDenied:'Acesso ao microfone negado. Permita nas configurações.',vNoTranscript:'Não consegui transcrever. Tente de novo ou escreva.'},
+  ja:{micTitle:'音声メッセージ',voiceMode:'音声対話モード',vStart:'タップして話す',vListening:'聴いています…',vThinking:'…',vSpeaking:'',vTap:'話す',vStop:'停止',vTapAgain:'タップして返答',vUnsupported:'このブラウザでは音声を利用できません。',vMicDenied:'マイクへのアクセスが拒否されました。設定で許可してください。',vNoTranscript:'文字起こしできませんでした。もう一度試すか、入力してください。'},
+  ur:{micTitle:'صوتی پیغام',voiceMode:'بول کر بات کرنے کا موڈ',vStart:'بولنے کے لیے چھوئیں',vListening:'میں سن رہا ہوں…',vThinking:'…',vSpeaking:'',vTap:'بولیں',vStop:'روکیں',vTapAgain:'جواب کے لیے چھوئیں',vUnsupported:'اس براؤزر پر آواز دستیاب نہیں۔',vMicDenied:'مائیکروفون تک رسائی مسترد۔ ترتیبات میں اجازت دیں۔',vNoTranscript:'میں اسے متن میں نہیں بدل سکا۔ دوبارہ کوشش کریں یا لکھیں۔'},
+  sw:{micTitle:'Ujumbe wa sauti',voiceMode:'Hali ya mazungumzo ya sauti',vStart:'Gusa kuongea',vListening:'Ninakusikiliza…',vThinking:'…',vSpeaking:'',vTap:'Ongea',vStop:'Simamisha',vTapAgain:'Gusa kujibu',vUnsupported:'Sauti haipatikani kwenye kivinjari hiki.',vMicDenied:'Ufikiaji wa kipaza sauti umekataliwa. Ruhusu kwenye mipangilio.',vNoTranscript:'Sikuweza kuandika ulichosema. Jaribu tena au andika.'}
+};
+
+/* ================= STATE ================= */
+let lang = 'fr';
+let history = [];
+let isLoading = false;
+let entries = [];
+let selectedMood = null;
+let currentPoem = 0;
+let breathing = false;
+let breatheTimer = null;
+let currentTech = 'coherence';
+let audioCtx = null, activeSound = null, soundNodes = [];
+let recognition = null, dictating = false, voiceActive = false, voiceListening = false;
+
+const $ = id => document.getElementById(id);
+const t = () => T[lang];
+
+/* ================= SAFETY ================= */
+const CRISIS_PATTERNS = [
+  /suicid/i, /me tuer/i, /en finir/i, /plus envie de vivre/i, /mettre fin à (ma|mes)/i, /disparaître pour toujours/i,
+  /kill myself/i, /end my life/i, /want to die/i, /don'?t want to (live|be alive)/i, /self.?harm/i, /hurt myself/i,
+  /انتحار/i, /أقتل نفسي/i, /أنهي حياتي/i, /خودکشی/i, /اپنی جان/i,
+  /matarme/i, /quitarme la vida/i, /me matar/i, /tirar minha vida/i, /acabar com (a minha|minha) vida/i,
+  /死にたい/i, /自殺/i, /消えたい/i, /kujiua/i, /kujidhuru/i
+];
+function detectCrisis(text){ return CRISIS_PATTERNS.some(p => p.test(text)); }
+
+const SYSTEM_PROMPT = `Tu es une présence bienveillante dans une application de soutien émotionnel appelée "Sérène". Tu n'es ni un thérapeute ni un médecin, et tu le rappelles si la conversation glisse vers un besoin clinique.
+
+TON APPROCHE (psychologie validée, formulée en langage universel et laïc) :
+- Écoute d'abord. Valide l'émotion avant toute chose, sans la minimiser ni l'amplifier.
+- Tu peux ensuite, avec délicatesse, offrir des pistes inspirées de : la résilience face à l'épreuve (l'épreuve peut construire), la gratitude (remarquer ce qui reste), l'acceptation de ce qu'on ne contrôle pas (déposer ce qui ne dépend pas de soi), l'introspection douce (s'examiner sans se juger), le recadrage bienveillant (interpréter avec bienveillance), le contentement, le pardon comme libération de soi, le lien social (ne pas porter seul), le sens (chaque difficulté porte en elle un passage vers plus de facilité).
+- JAMAIS de vocabulaire religieux, JAMAIS de référence à une religion, une pratique religieuse ou un texte sacré. Tes principes restent implicites, universels.
+- Pas de "je comprends ce que tu ressens" mécanique, pas de reformulation miroir systématique.
+- Pas de diagnostic, pas de conseil médicamenteux, jamais.
+- Tu parles peu : 2 à 4 phrases en général. Le silence et la sobriété ont de la valeur.
+- Une seule question douce à la fois, seulement si elle est juste.
+- Registre : chaleureux, sobre, humain. Comme quelqu'un qui a vécu et qui écoute vraiment.
+- Si la personne va bien, reste à l'unisson, léger.
+- Si la personne évoque la mort, le suicide, l'automutilation ou un danger : exprime avec gravité et chaleur que ce qu'elle porte dépasse ce que cet espace peut offrir, encourage-la immédiatement à contacter une ligne d'écoute ou un proche de confiance, et reste présent. Ne donne JAMAIS de détails sur des méthodes.
+- Réponds TOUJOURS dans la langue du dernier message de l'utilisateur.`;
+
+/* ================= APPLY LANGUAGE ================= */
+function applyLang(){
+  const L = LANGS[lang];
+  document.documentElement.lang = lang;
+  document.documentElement.dir = L.dir;
+  $('lang-btn').textContent = lang.toUpperCase();
+  $('app-title').textContent = t().appTitle;
+  document.title = t().appTitle;
+  // nav
+  const tabs = document.querySelectorAll('.nav-tab');
+  tabs[0].textContent = t().tabs.chat;
+  tabs[1].textContent = t().tabs.breathe;
+  tabs[2].textContent = t().tabs.journal;
+  tabs[3].textContent = t().tabs.resources;
+  // chat
+  $('intro-text').textContent = t().intro;
+  $('disclaimer-text').textContent = t().disclaimer;
+  $('input').placeholder = t().placeholder;
+  $('presence-label').textContent = t().presence;
+  $('mic-btn').title = VOICE_T[lang].micTitle;
+  $('voice-mode-label').textContent = VOICE_T[lang].voiceMode;
+  if(!voiceActive){ $('voice-status').textContent=''; $('voice-toggle').textContent = VOICE_T[lang].vTap; }
+  // breathe
+  $('breathe-title').textContent = t().breatheTitle;
+  $('breathe-sub').textContent = t().breatheSub;
+  $('breathe-start').textContent = breathing ? t().stop : t().start;
+  renderTechs();
+  // journal
+  $('j-today-title').textContent = t().jToday;
+  $('journal-text').placeholder = t().journalPlaceholder;
+  $('gratitude-hint').textContent = t().gratitudeHint;
+  $('journal-save').textContent = t().save;
+  if(!jAudioRecording) $('j-audio-label').textContent = t().jAudio;
+  $('chart-title').textContent = t().chartTitle;
+  $('j-history-title').textContent = t().history;
+  $('storage-note').textContent = t().storageNote;
+  renderMoods(); renderEntries(); renderChart();
+  // resources
+  $('res-sounds-title').textContent = t().resSounds;
+  $('res-library-title').textContent = t().resLibrary;
+  $('library-sub').textContent = t().librarySub;
+  $('res-poems-title').textContent = t().resPoems;
+  $('res-art-title').textContent = t().resArt;
+  $('res-refuge-title').textContent = t().resRefuge;
+  $('refuge-hint').textContent = t().refugeHint;
+  $('res-quote-title').textContent = t().resQuote;
+  $('quote-refresh').textContent = t().another;
+  renderSounds(); renderPoem(); renderArt(); renderRefuge(); renderLibrary(); renderQuote();
+  // sos
+  $('sos-title').textContent = t().sosTitle;
+  $('sos-text').textContent = t().sosText;
+  $('sos-close').textContent = t().sosClose;
+  renderSOS();
+}
+
+function renderLangMenu(){
+  const m = $('lang-menu');
+  m.innerHTML = '';
+  Object.entries(LANGS).forEach(([code,info])=>{
+    const b = document.createElement('button');
+    b.className = 'lang-opt'+(code===lang?' active':'');
+    b.textContent = info.name;
+    b.onclick = ()=>{ lang = code; saveLang(); applyLang(); renderLangMenu(); m.classList.remove('visible'); };
+    m.appendChild(b);
+  });
+}
+
+/* ================= NAV ================= */
+document.querySelectorAll('.nav-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+    tab.classList.add('active');
+    $('view-'+tab.dataset.view).classList.add('active');
+  });
+});
+
+/* ================= CHAT ================= */
+const messagesEl = $('messages'), inputEl = $('input'), sendBtn = $('send-btn'), presenceEl = $('presence');
+
+function getTime(){ return new Date().toLocaleTimeString(lang==='ar'?'ar':lang,{hour:'2-digit',minute:'2-digit'}); }
+function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
+function scrollBottom(){ messagesEl.scrollTo({top:messagesEl.scrollHeight,behavior:'smooth'}); }
+
+function appendUserMsg(text){
+  const w = document.createElement('div');
+  w.className = 'msg-user msg-enter';
+  w.innerHTML = `<div><div class="bubble">${escapeHtml(text)}</div></div>`;
+  messagesEl.appendChild(w); scrollBottom();
+}
+function appendAIMsg(text){
+  const w = document.createElement('div');
+  w.className = 'msg-ai msg-enter';
+  const f = escapeHtml(text).replace(/\*([^*]+)\*/g,'<em>$1</em>');
+  w.innerHTML = `<div class="response-text">${f}</div>`;
+  messagesEl.appendChild(w); scrollBottom();
+}
+function appendCrisisCard(){
+  const w = document.createElement('div');
+  w.className = 'msg-ai msg-enter';
+  let links = t().helplines.map(h=>`<a href="${h.href}" target="_blank" rel="noopener">${h.label}</a>`).join('');
+  w.innerHTML = `<div class="crisis-card"><h4>${t().crisisTitle}</h4><p>${t().crisisText}</p>${links}</div>`;
+  messagesEl.appendChild(w); scrollBottom();
+}
+
+async function askAI(text){
+  history.push({role:'user',content:text});
+  const crisis = detectCrisis(text);
+  const res = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-6',
+      max_tokens:1000,
+      system:SYSTEM_PROMPT + (crisis ? '\n\nALERTE : le dernier message contient des signaux de détresse grave. Réponds avec gravité, chaleur et brièveté, et encourage fermement le contact avec une ligne d\'écoute. Une carte avec les numéros d\'urgence sera affichée juste après ta réponse.' : ''),
+      messages:history
+    })
+  });
+  const data = await res.json();
+  const reply = data.content?.find(b=>b.type==='text')?.text || '…';
+  history.push({role:'assistant',content:reply});
+  return {reply,crisis};
+}
+
+async function sendMessage(){
+  const text = inputEl.value.trim();
+  if(!text || isLoading) return;
+  inputEl.value=''; inputEl.style.height=''; sendBtn.disabled=true; isLoading=true;
+  appendUserMsg(text);
+  await new Promise(r=>setTimeout(r,300));
+  presenceEl.classList.add('visible'); scrollBottom();
+  try{
+    const {reply,crisis} = await askAI(text);
+    await new Promise(r=>setTimeout(r,1600));
+    presenceEl.classList.remove('visible');
+    await new Promise(r=>setTimeout(r,150));
+    appendAIMsg(reply);
+    if(crisis) appendCrisisCard();
+  }catch(e){
+    presenceEl.classList.remove('visible');
+    appendAIMsg(t().errorMsg);
+  }
+  isLoading=false; inputEl.focus(); updateSend();
+}
+function updateSend(){ sendBtn.disabled = inputEl.value.trim().length===0 || isLoading; }
+inputEl.addEventListener('input',()=>{ inputEl.style.height=''; inputEl.style.height=Math.min(inputEl.scrollHeight,130)+'px'; updateSend(); });
+inputEl.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMessage(); } });
+sendBtn.addEventListener('click',sendMessage);
+
+/* ================= VOICE: messages vocaux + dialogue ================= */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const synth = window.speechSynthesis;
+const micBtn = $('mic-btn');
+
+// --- VOICE MESSAGE (record real audio + transcribe) ---
+let mediaRecorder = null, audioChunks = [], recStream = null, recRecognizer = null, recTranscript = '';
+
+async function startVoiceMsg(){
+  if(dictating){ stopVoiceMsg(); return; }
+  // 1) request mic permission explicitly — this is what was silently failing
+  let stream;
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({audio:true});
+  }catch(err){
+    flashMicError();
+    return;
+  }
+  recStream = stream;
+  audioChunks = []; recTranscript = '';
+  // 2) record audio for a playable voice message
+  let mime = '';
+  ['audio/webm','audio/mp4','audio/ogg'].forEach(m=>{ if(!mime && window.MediaRecorder && MediaRecorder.isTypeSupported(m)) mime=m; });
+  try{
+    mediaRecorder = mime ? new MediaRecorder(stream,{mimeType:mime}) : new MediaRecorder(stream);
+  }catch(e){ mediaRecorder = null; }
+  if(mediaRecorder){
+    mediaRecorder.ondataavailable = ev=>{ if(ev.data.size>0) audioChunks.push(ev.data); };
+    mediaRecorder.onstop = onVoiceMsgStop;
+    mediaRecorder.start();
+  }
+  // 3) transcribe in parallel (if supported) so the AI gets text
+  if(SR){
+    recRecognizer = new SR();
+    recRecognizer.lang = SPEECH_LOCALE[lang] || 'en-US';
+    recRecognizer.interimResults = true;
+    recRecognizer.continuous = true;
+    recRecognizer.onresult = e=>{
+      let txt='';
+      for(let i=0;i<e.results.length;i++) txt += e.results[i][0].transcript;
+      recTranscript = txt;
+    };
+    recRecognizer.onerror = ()=>{};
+    try{ recRecognizer.start(); }catch(e){}
+  }
+  dictating = true;
+  micBtn.classList.add('recording');
+}
+function stopVoiceMsg(){
+  dictating = false;
+  micBtn.classList.remove('recording');
+  if(recRecognizer){ try{recRecognizer.stop();}catch(e){} }
+  if(mediaRecorder && mediaRecorder.state!=='inactive'){ try{mediaRecorder.stop();}catch(e){ cleanupRec(); } }
+  else { cleanupRec(); if(recTranscript.trim()) sendVoiceMessage(null,recTranscript.trim()); }
+}
+function onVoiceMsgStop(){
+  const blob = audioChunks.length ? new Blob(audioChunks,{type:audioChunks[0].type||'audio/webm'}) : null;
+  const url = blob ? URL.createObjectURL(blob) : null;
+  cleanupRec();
+  const text = recTranscript.trim();
+  if(!text && !url){ flashMicError(); return; }
+  sendVoiceMessage(url,text);
+}
+function cleanupRec(){
+  if(recStream){ recStream.getTracks().forEach(t=>t.stop()); recStream=null; }
+  mediaRecorder=null; recRecognizer=null;
+}
+function flashMicError(){
+  dictating=false; micBtn.classList.remove('recording');
+  const old = inputEl.placeholder;
+  inputEl.placeholder = VOICE_T[lang].vMicDenied;
+  setTimeout(()=>{ inputEl.placeholder = t().placeholder; }, 3500);
+}
+
+function appendVoiceBubble(url){
+  const w = document.createElement('div');
+  w.className = 'msg-user msg-enter';
+  if(url){
+    w.innerHTML = `<div><div class="bubble voice-bubble"><button class="vb-play" aria-label="play">▶</button><div class="vb-wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><audio src="${url}" preload="metadata"></audio></div></div>`;
+    const audio = w.querySelector('audio');
+    const btn = w.querySelector('.vb-play');
+    btn.onclick = ()=>{
+      if(audio.paused){ document.querySelectorAll('#messages audio').forEach(a=>{if(a!==audio)a.pause();}); audio.play(); btn.textContent='⏸'; w.querySelector('.vb-wave').classList.add('playing'); }
+      else { audio.pause(); btn.textContent='▶'; w.querySelector('.vb-wave').classList.remove('playing'); }
+    };
+    audio.onended = ()=>{ btn.textContent='▶'; w.querySelector('.vb-wave').classList.remove('playing'); };
+  } else {
+    w.innerHTML = `<div><div class="bubble voice-bubble"><span class="vb-mic">🎤</span></div></div>`;
+  }
+  messagesEl.appendChild(w); scrollBottom();
+}
+
+async function sendVoiceMessage(url,text){
+  if(isLoading) return;
+  appendVoiceBubble(url);
+  if(!text){
+    // no transcription available — tell the AI a voice message was sent without text
+    appendAIMsg(VOICE_T[lang].vNoTranscript);
+    return;
+  }
+  isLoading=true; updateSend();
+  await new Promise(r=>setTimeout(r,250));
+  presenceEl.classList.add('visible'); scrollBottom();
+  try{
+    const {reply,crisis} = await askAI(text);
+    await new Promise(r=>setTimeout(r,1400));
+    presenceEl.classList.remove('visible');
+    await new Promise(r=>setTimeout(r,120));
+    appendAIMsg(reply);
+    if(crisis) appendCrisisCard();
+  }catch(e){
+    presenceEl.classList.remove('visible');
+    appendAIMsg(t().errorMsg);
+  }
+  isLoading=false; updateSend();
+}
+micBtn.addEventListener('click',startVoiceMsg);
+
+// --- Voice dialogue mode (hands-free) ---
+const voiceOverlay = $('voice-overlay'), voiceStatus = $('voice-status'), voiceTranscript = $('voice-transcript'), voiceToggle = $('voice-toggle');
+
+function pickVoice(){
+  const voices = synth ? synth.getVoices() : [];
+  const loc = SPEECH_LOCALE[lang] || 'en-US';
+  const code = loc.split('-')[0];
+  let v = voices.find(x=>x.lang===loc && /female|femme|woman|samantha|amelie|aurélie|google/i.test(x.name))
+       || voices.find(x=>x.lang===loc)
+       || voices.find(x=>x.lang.startsWith(code))
+       || voices[0];
+  return v;
+}
+function speak(text){
+  return new Promise(resolve=>{
+    if(!synth){ resolve(); return; }
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/\*/g,''));
+    const v = pickVoice(); if(v) u.voice=v;
+    u.lang = SPEECH_LOCALE[lang] || 'en-US';
+    u.rate = 0.92; u.pitch = 1.0;
+    voiceOverlay.classList.add('speaking'); voiceOverlay.classList.remove('listening');
+    voiceStatus.textContent = '';
+    u.onend = ()=>{ voiceOverlay.classList.remove('speaking'); resolve(); };
+    u.onerror = ()=>{ voiceOverlay.classList.remove('speaking'); resolve(); };
+    synth.speak(u);
+  });
+}
+async function voiceListen(){
+  if(!SR){ voiceStatus.textContent = VOICE_T[lang].vUnsupported; return; }
+  // ensure mic permission first
+  try{ const s = await navigator.mediaDevices.getUserMedia({audio:true}); s.getTracks().forEach(t=>t.stop()); }
+  catch(e){ voiceStatus.textContent = VOICE_T[lang].vMicDenied; return; }
+  const rec = new SR();
+  rec.lang = SPEECH_LOCALE[lang] || 'en-US';
+  rec.interimResults = true; rec.continuous = false;
+  let finalText = '';
+  voiceListening = true;
+  voiceOverlay.classList.add('listening');
+  voiceStatus.textContent = VOICE_T[lang].vListening;
+  voiceTranscript.textContent = '';
+  voiceToggle.textContent = VOICE_T[lang].vStop;
+  voiceToggle.classList.add('active');
+  rec.onresult = e=>{
+    let interim='';
+    for(let i=0;i<e.results.length;i++){
+      if(e.results[i].isFinal) finalText += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    voiceTranscript.textContent = finalText || interim;
+  };
+  rec.onerror = ()=>{ voiceListening=false; voiceOverlay.classList.remove('listening'); voiceToggle.classList.remove('active'); voiceToggle.textContent=VOICE_T[lang].vTap; };
+  rec.onend = async ()=>{
+    voiceListening=false;
+    voiceOverlay.classList.remove('listening');
+    voiceToggle.classList.remove('active');
+    const text = (finalText || voiceTranscript.textContent).trim();
+    if(!text || !voiceActive){ voiceToggle.textContent = VOICE_T[lang].vTap; if(voiceActive) voiceStatus.textContent=VOICE_T[lang].vStart; return; }
+    appendUserMsg(text);
+    voiceStatus.textContent = VOICE_T[lang].vThinking;
+    voiceToggle.textContent = '…';
+    try{
+      const {reply,crisis} = await askAI(text);
+      if(!voiceActive) return;
+      appendAIMsg(reply);
+      voiceTranscript.textContent = reply;
+      await speak(reply);
+      if(crisis){ appendCrisisCard(); }
+      voiceStatus.textContent = VOICE_T[lang].vTapAgain;
+      voiceToggle.textContent = VOICE_T[lang].vTap;
+      if(crisis && voiceActive){ $('sos-overlay').classList.add('visible'); }
+    }catch(e){
+      voiceTranscript.textContent = t().errorMsg;
+      voiceToggle.textContent = VOICE_T[lang].vTap;
+    }
+  };
+  try{ rec.start(); recognition = rec; }
+  catch(e){ voiceListening=false; voiceOverlay.classList.remove('listening'); }
+}
+function openVoiceMode(){
+  if(!SR || !synth){ alert(VOICE_T[lang].vUnsupported); return; }
+  voiceActive = true;
+  voiceOverlay.classList.add('visible');
+  voiceStatus.textContent = VOICE_T[lang].vStart;
+  voiceTranscript.textContent = '';
+  voiceToggle.textContent = VOICE_T[lang].vTap;
+  voiceToggle.classList.remove('active');
+  if(synth.getVoices().length===0){ synth.onvoiceschanged = ()=>{}; }
+}
+function closeVoiceMode(){
+  voiceActive=false; voiceListening=false;
+  if(recognition){ try{recognition.stop();}catch(e){} }
+  if(synth){ synth.cancel(); }
+  voiceOverlay.classList.remove('visible','listening','speaking');
+}
+$('voice-mode-btn').addEventListener('click',openVoiceMode);
+$('voice-exit').addEventListener('click',closeVoiceMode);
+voiceToggle.addEventListener('click',()=>{
+  if(voiceListening){ if(recognition){try{recognition.stop();}catch(e){}} return; }
+  if(synth && synth.speaking){ synth.cancel(); voiceOverlay.classList.remove('speaking'); }
+  voiceListen();
+});
+
+/* ================= BREATHE ================= */
+const TECHS = {
+  coherence:{phases:[['inhale',5],['exhale',5]]},
+  box:{phases:[['inhale',4],['hold',4],['exhale',4],['rest',4]]},
+  sleep:{phases:[['inhale',4],['hold',7],['exhale',8]]}
+};
+function renderTechs(){
+  const row = $('tech-row'); row.innerHTML='';
+  Object.keys(TECHS).forEach(k=>{
+    const b = document.createElement('button');
+    b.className = 'tech-btn'+(k===currentTech?' active':'');
+    b.textContent = t().techniques[k].name;
+    b.onclick = ()=>{ if(breathing) stopBreathing(); currentTech=k; renderTechs(); };
+    row.appendChild(b);
+  });
+  $('tech-desc').textContent = t().techniques[currentTech].desc;
+}
+function startBreathing(){
+  breathing = true;
+  $('breathe-start').textContent = t().stop;
+  $('breathe-start').classList.add('running');
+  runPhaseLoop();
+}
+function stopBreathing(){
+  breathing = false;
+  clearTimeout(breatheTimer);
+  $('breathe-start').textContent = t().start;
+  $('breathe-start').classList.remove('running');
+  $('breathe-phase').textContent = '';
+  $('breathe-count').textContent = '';
+  $('breathe-circle').style.transform = 'scale(1)';
+}
+function runPhaseLoop(){
+  const phases = TECHS[currentTech].phases;
+  let i = 0;
+  function next(){
+    if(!breathing) return;
+    const [phase,dur] = phases[i];
+    $('breathe-phase').textContent = t().phases[phase];
+    const circle = $('breathe-circle');
+    circle.style.transition = `transform ${dur}s cubic-bezier(.4,0,.4,1)`;
+    if(phase==='inhale') circle.style.transform = 'scale(1.9)';
+    else if(phase==='exhale') circle.style.transform = 'scale(1)';
+    let count = dur;
+    $('breathe-count').textContent = count;
+    const tick = setInterval(()=>{
+      count--;
+      if(count<=0 || !breathing){ clearInterval(tick); }
+      else $('breathe-count').textContent = count;
+    },1000);
+    breatheTimer = setTimeout(()=>{ i=(i+1)%phases.length; next(); },dur*1000);
+  }
+  next();
+}
+$('breathe-start').addEventListener('click',()=>{ breathing ? stopBreathing() : startBreathing(); });
+
+/* ================= JOURNAL ================= */
+const MOOD_EMOJI = ['🌧️','☁️','🌫️','🌤️','☀️'];
+
+function renderMoods(){
+  const row = $('mood-row'); row.innerHTML='';
+  MOOD_EMOJI.forEach((e,i)=>{
+    const b = document.createElement('button');
+    b.className = 'mood-btn'+(selectedMood===i?' selected':'');
+    b.innerHTML = `${e}<span>${t().moods[i]}</span>`;
+    b.onclick = ()=>{ selectedMood=i; renderMoods(); };
+    row.appendChild(b);
+  });
+}
+async function loadEntries(){
+  try{
+    const r = await window.storage.get('journal-entries');
+    entries = r ? JSON.parse(r.value) : [];
+  }catch(e){ entries = []; }
+  renderEntries(); renderChart();
+}
+async function saveEntries(){
+  try{ await window.storage.set('journal-entries',JSON.stringify(entries)); }catch(e){}
+}
+/* ===== Journal audio note ===== */
+let jAudioRecording = false, jAudioData = null, jRecorder = null, jChunks = [], jStream = null;
+$('j-audio-btn').addEventListener('click',async ()=>{
+  if(jAudioRecording){
+    if(jRecorder && jRecorder.state!=='inactive'){ try{jRecorder.stop();}catch(e){} }
+    return;
+  }
+  let stream;
+  try{ stream = await navigator.mediaDevices.getUserMedia({audio:true}); }
+  catch(e){ const l=$('j-audio-label'); l.textContent=VOICE_T[lang].vMicDenied; setTimeout(()=>l.textContent=t().jAudio,3000); return; }
+  jStream = stream; jChunks=[];
+  let mime=''; ['audio/webm','audio/mp4','audio/ogg'].forEach(m=>{ if(!mime && window.MediaRecorder && MediaRecorder.isTypeSupported(m)) mime=m; });
+  try{ jRecorder = mime ? new MediaRecorder(stream,{mimeType:mime}) : new MediaRecorder(stream); }catch(e){ jRecorder=null; }
+  if(!jRecorder){ return; }
+  jRecorder.ondataavailable = ev=>{ if(ev.data.size>0) jChunks.push(ev.data); };
+  jRecorder.onstop = ()=>{
+    if(jStream){ jStream.getTracks().forEach(t=>t.stop()); jStream=null; }
+    jAudioRecording=false;
+    $('j-audio-btn').classList.remove('recording');
+    $('j-audio-label').textContent = t().jAudio;
+    if(!jChunks.length) return;
+    const blob = new Blob(jChunks,{type:jChunks[0].type||'audio/webm'});
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      jAudioData = reader.result;
+      const p = $('j-audio-preview');
+      p.innerHTML = `<div class="bubble voice-bubble"><button class="vb-play" aria-label="play">▶</button><div class="vb-wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><audio src="${jAudioData}"></audio></div>`;
+      const audio=p.querySelector('audio'),btn=p.querySelector('.vb-play'),wave=p.querySelector('.vb-wave');
+      btn.onclick=()=>{ if(audio.paused){audio.play();btn.textContent='⏸';wave.classList.add('playing');}else{audio.pause();btn.textContent='▶';wave.classList.remove('playing');} };
+      audio.onended=()=>{btn.textContent='▶';wave.classList.remove('playing');};
+    };
+    reader.readAsDataURL(blob);
+  };
+  jRecorder.start();
+  jAudioRecording=true;
+  $('j-audio-btn').classList.add('recording');
+  $('j-audio-label').textContent = t().jAudioStop;
+});
+
+$('journal-save').addEventListener('click',async ()=>{
+  if(selectedMood===null && !$('journal-text').value.trim() && !jAudioData) return;
+  entries.unshift({
+    date: new Date().toISOString(),
+    mood: selectedMood,
+    text: $('journal-text').value.trim(),
+    audio: jAudioData || null
+  });
+  if(entries.length>365) entries = entries.slice(0,365);
+  await saveEntries();
+  $('journal-text').value=''; selectedMood=null; jAudioData=null; $('j-audio-preview').innerHTML='';
+  renderMoods(); renderEntries(); renderChart();
+  const btn = $('journal-save');
+  btn.textContent = t().saved;
+  setTimeout(()=>btn.textContent = t().save,1500);
+});
+function renderEntries(){
+  const list = $('entries-list'); list.innerHTML='';
+  if(entries.length===0){
+    list.innerHTML = `<p class="empty-state">${t().emptyEntries}</p>`;
+    return;
+  }
+  entries.slice(0,30).forEach((en,idx)=>{
+    const d = new Date(en.date);
+    const card = document.createElement('div');
+    card.className = 'entry-card';
+    let audioHtml = '';
+    if(en.audio){ audioHtml = `<div class="bubble voice-bubble entry-audio"><button class="vb-play" aria-label="play">▶</button><div class="vb-wave"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><audio src="${en.audio}" preload="metadata"></audio></div>`; }
+    card.innerHTML = `
+      <div class="entry-head">
+        <span class="entry-mood">${en.mood!==null&&en.mood!==undefined?MOOD_EMOJI[en.mood]:'·'}</span>
+        <span class="entry-date">${d.toLocaleDateString(lang==='ar'?'ar':lang,{day:'numeric',month:'short',year:'numeric'})} · ${d.toLocaleTimeString(lang==='ar'?'ar':lang,{hour:'2-digit',minute:'2-digit'})}</span>
+        <button class="entry-del">${t().delete}</button>
+      </div>
+      ${en.text?`<div class="entry-text">${escapeHtml(en.text)}</div>`:''}
+      ${audioHtml}`;
+    card.querySelector('.entry-del').onclick = async ()=>{
+      entries.splice(idx,1); await saveEntries(); renderEntries(); renderChart();
+    };
+    const ab = card.querySelector('.entry-audio');
+    if(ab){
+      const audio = ab.querySelector('audio'); const btn = ab.querySelector('.vb-play'); const wave = ab.querySelector('.vb-wave');
+      btn.onclick = ()=>{ if(audio.paused){ document.querySelectorAll('audio').forEach(a=>{if(a!==audio)a.pause();}); audio.play(); btn.textContent='⏸'; wave.classList.add('playing'); } else { audio.pause(); btn.textContent='▶'; wave.classList.remove('playing'); } };
+      audio.onended = ()=>{ btn.textContent='▶'; wave.classList.remove('playing'); };
+    }
+    list.appendChild(card);
+  });
+}
+function renderChart(){
+  const svg = $('mood-chart');
+  svg.innerHTML='';
+  // build last 14 days mood data
+  const days = [];
+  for(let i=13;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const key = d.toDateString();
+    const dayEntries = entries.filter(e=>new Date(e.date).toDateString()===key && e.mood!==null&&e.mood!==undefined);
+    const avg = dayEntries.length ? dayEntries.reduce((s,e)=>s+e.mood,0)/dayEntries.length : null;
+    days.push(avg);
+  }
+  const W=320,H=120,pad=12;
+  // grid lines
+  for(let m=0;m<5;m++){
+    const y = pad + (H-2*pad)*(1-m/4);
+    svg.innerHTML += `<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#221E30" stroke-width="0.5"/>`;
+  }
+  // line path
+  let path='', pts=[];
+  days.forEach((v,i)=>{
+    if(v===null) return;
+    const x = pad + (W-2*pad)*(i/13);
+    const y = pad + (H-2*pad)*(1-v/4);
+    pts.push([x,y,v]);
+  });
+  if(pts.length>1){
+    path = 'M'+pts.map(p=>`${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' L');
+    svg.innerHTML += `<path d="${path}" fill="none" stroke="#8B7BA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+  pts.forEach(p=>{
+    svg.innerHTML += `<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="#A99BC4"/>`;
+  });
+  if(pts.length===0){
+    svg.innerHTML += `<text x="${W/2}" y="${H/2}" text-anchor="middle" fill="#5C5468" font-size="11" font-style="italic">— · —</text>`;
+  }
+}
+
+/* ================= SOUNDS (Web Audio generative ambient) ================= */
+const SOUNDS = ['rain','wind','deep','night'];
+const SOUND_ICONS = {rain:'🌧',wind:'🍃',deep:'🌊',night:'🌙'};
+
+function renderSounds(){
+  const grid = $('sound-grid'); grid.innerHTML='';
+  SOUNDS.forEach(s=>{
+    const b = document.createElement('button');
+    b.className = 'sound-card'+(activeSound===s?' playing':'');
+    b.innerHTML = `<span class="sound-icon">${SOUND_ICONS[s]}</span><span class="sound-name">${t().sounds[s]}</span><span class="sound-state">${activeSound===s?t().playing:t().play}</span>`;
+    b.onclick = ()=>toggleSound(s);
+    grid.appendChild(b);
+  });
+}
+function stopAllSound(){
+  soundNodes.forEach(n=>{ try{n.stop?n.stop():n.disconnect();}catch(e){} });
+  soundNodes=[]; activeSound=null;
+}
+function toggleSound(s){
+  if(activeSound===s){ stopAllSound(); renderSounds(); return; }
+  stopAllSound();
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  const master = audioCtx.createGain();
+  master.gain.value = 0; master.connect(audioCtx.destination);
+  master.gain.linearRampToValueAtTime(0.5, audioCtx.currentTime+2);
+  soundNodes.push(master);
+
+  function noise(){
+    const len = audioCtx.sampleRate*2;
+    const buf = audioCtx.createBuffer(1,len,audioCtx.sampleRate);
+    const d = buf.getChannelData(0);
+    let last=0;
+    for(let i=0;i<len;i++){ const w=Math.random()*2-1; d[i]=(last+0.02*w)/1.02; last=d[i]; d[i]*=3.5; }
+    const src = audioCtx.createBufferSource();
+    src.buffer=buf; src.loop=true;
+    return src;
+  }
+  if(s==='rain'){
+    const n = noise();
+    const f = audioCtx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=2400; f.Q.value=0.4;
+    const g = audioCtx.createGain(); g.gain.value=0.35;
+    n.connect(f); f.connect(g); g.connect(master); n.start();
+    soundNodes.push(n,f,g);
+  } else if(s==='wind'){
+    const n = noise();
+    const f = audioCtx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=420;
+    const g = audioCtx.createGain(); g.gain.value=0.8;
+    const lfo = audioCtx.createOscillator(); lfo.frequency.value=0.08;
+    const lfoG = audioCtx.createGain(); lfoG.gain.value=200;
+    lfo.connect(lfoG); lfoG.connect(f.frequency); lfo.start();
+    n.connect(f); f.connect(g); g.connect(master); n.start();
+    soundNodes.push(n,f,g,lfo,lfoG);
+  } else if(s==='deep'){
+    [55,82.4,110].forEach((fr,i)=>{
+      const o = audioCtx.createOscillator(); o.type='sine'; o.frequency.value=fr;
+      const g = audioCtx.createGain(); g.gain.value=0.12/(i+1);
+      const lfo = audioCtx.createOscillator(); lfo.frequency.value=0.05+i*0.03;
+      const lg = audioCtx.createGain(); lg.gain.value=0.05;
+      lfo.connect(lg); lg.connect(g.gain); lfo.start();
+      o.connect(g); g.connect(master); o.start();
+      soundNodes.push(o,g,lfo,lg);
+    });
+  } else if(s==='night'){
+    const n = noise();
+    const f = audioCtx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=300;
+    const g = audioCtx.createGain(); g.gain.value=0.5;
+    n.connect(f); f.connect(g); g.connect(master); n.start();
+    const o = audioCtx.createOscillator(); o.type='sine'; o.frequency.value=174;
+    const og = audioCtx.createGain(); og.gain.value=0.04;
+    o.connect(og); og.connect(master); o.start();
+    soundNodes.push(n,f,g,o,og);
+  }
+  activeSound = s; renderSounds();
+}
+
+/* ================= POEMS / ART / QUOTES ================= */
+function renderPoem(){
+  const poems = t().poems;
+  if(currentPoem>=poems.length) currentPoem=0;
+  $('poem-text').textContent = poems[currentPoem];
+  $('poem-index').textContent = `${currentPoem+1} / ${poems.length}`;
+}
+$('poem-prev').addEventListener('click',()=>{ currentPoem=(currentPoem-1+t().poems.length)%t().poems.length; renderPoem(); });
+$('poem-next').addEventListener('click',()=>{ currentPoem=(currentPoem+1)%t().poems.length; renderPoem(); });
+
+const ART_GRADIENTS = [
+  'linear-gradient(165deg,#2a3548 0%,#4a5d78 45%,#8fa3b8 80%,#c9d4dd 100%)',
+  'linear-gradient(180deg,#1a2436 0%,#243d54 50%,#3a6073 100%)',
+  'linear-gradient(160deg,#171522 0%,#2c2740 50%,#4a3f63 85%,#6b5a85 100%)',
+  'linear-gradient(170deg,#3d3526 0%,#6b5a3a 45%,#c4a872 85%,#e8d5a8 100%)',
+  'linear-gradient(175deg,#1c2228 0%,#2f3d45 40%,#52656e 75%,#8fa5ad 100%)'
+];
+function renderArt(){
+  const sc = $('art-scroll'); sc.innerHTML='';
+  ART_GRADIENTS.forEach((g,i)=>{
+    const c = document.createElement('div');
+    c.className='art-card';
+    c.style.background = g;
+    const label = t().artLabels[i];
+    c.innerHTML = `<div style="position:absolute;inset:0;background:radial-gradient(circle at ${30+i*15}% ${20+i*10}%,rgba(240,235,227,.14),transparent 55%)"></div><span class="art-label">${label}</span>`;
+    c.onclick = ()=>openImgViewer({grad:g,glow:i,caption:label});
+    sc.appendChild(c);
+  });
+}
+
+/* ===== Personal refuge gallery (local, private) ===== */
+let refuges = [];
+async function loadRefuges(){
+  try{ const r = await window.storage.get('refuge-images'); refuges = r ? JSON.parse(r.value) : []; }
+  catch(e){ refuges = []; }
+  renderRefuge();
+}
+async function saveRefuges(){
+  try{ await window.storage.set('refuge-images', JSON.stringify(refuges)); }catch(e){}
+}
+function renderRefuge(){
+  const sc = $('refuge-scroll'); if(!sc) return;
+  sc.innerHTML='';
+  if(refuges.length===0){
+    const empty = document.createElement('button');
+    empty.className='refuge-empty';
+    empty.innerHTML = `<span class="re-icon">🖼️</span><span class="re-txt">${t().refugeHint.split('—')[0].trim()}</span>`;
+    empty.onclick = ()=>$('refuge-input').click();
+    sc.appendChild(empty);
+    return;
+  }
+  refuges.forEach((img,idx)=>{
+    const c = document.createElement('div');
+    c.className='refuge-card';
+    c.style.backgroundImage = `url(${img.data})`;
+    c.innerHTML = `<button class="refuge-del" aria-label="del">✕</button>`;
+    c.querySelector('.refuge-del').onclick = async (e)=>{ e.stopPropagation(); refuges.splice(idx,1); await saveRefuges(); renderRefuge(); };
+    c.onclick = ()=>openImgViewer({src:img.data,caption:img.caption||''});
+    sc.appendChild(c);
+  });
+}
+$('refuge-add').addEventListener('click',()=>$('refuge-input').click());
+$('refuge-input').addEventListener('change',async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  // downscale to keep storage light
+  try{
+    const dataUrl = await compressImage(file, 1200, 0.82);
+    refuges.unshift({data:dataUrl, caption:'', date:Date.now()});
+    if(refuges.length>40) refuges = refuges.slice(0,40);
+    await saveRefuges();
+    renderRefuge();
+  }catch(err){}
+  e.target.value='';
+});
+function compressImage(file, maxDim, quality){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let {width:w,height:h} = img;
+        if(w>h && w>maxDim){ h=h*maxDim/w; w=maxDim; }
+        else if(h>maxDim){ w=w*maxDim/h; h=maxDim; }
+        const canvas = document.createElement('canvas');
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg',quality));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ===== Fullscreen image viewer ===== */
+function openImgViewer({src,grad,glow,caption}){
+  const content = $('img-content');
+  if(src){ content.innerHTML = `<img src="${src}" alt="">`; }
+  else if(grad){ content.innerHTML = `<div class="grad-full" style="background:${grad}"><div style="position:absolute;inset:0;background:radial-gradient(circle at ${30+(glow||0)*15}% ${20+(glow||0)*10}%,rgba(240,235,227,.16),transparent 55%)"></div></div>`; }
+  $('img-caption').textContent = caption||'';
+  $('img-viewer').classList.add('visible');
+}
+$('img-close').addEventListener('click',()=>$('img-viewer').classList.remove('visible'));
+$('img-viewer').addEventListener('click',e=>{ if(e.target.id==='img-viewer'||e.target.id==='img-content') $('img-viewer').classList.remove('visible'); });
+
+/* ===== Audio library (admin-managed) ===== */
+let tracks = [], adminMode = false, libAudio = null, libPlayingId = null, tdMode = 'file', tdFileData = null;
+const TYPE_ICON = {poetry:'📜',music:'🎵',nature:'🍃',voice:'🗣️'};
+
+async function loadTracks(){
+  try{ const r = await window.storage.get('audio-tracks'); tracks = r ? JSON.parse(r.value) : []; }
+  catch(e){ tracks = []; }
+  renderLibrary();
+}
+async function saveTracks(){ try{ await window.storage.set('audio-tracks', JSON.stringify(tracks)); }catch(e){} }
+
+function renderLibrary(){
+  const list = $('track-list'); if(!list) return;
+  list.innerHTML='';
+  if(tracks.length===0){
+    list.innerHTML = `<p class="track-empty">${t().libraryEmpty}</p>`;
+    return;
+  }
+  tracks.forEach((tr,idx)=>{
+    const card = document.createElement('div');
+    card.className = 'track-card'+(libPlayingId===tr.id?' playing':'');
+    const typeName = (t().tdTypes&&t().tdTypes[tr.type])||tr.type||'';
+    card.innerHTML = `
+      <button class="track-play" aria-label="play">${libPlayingId===tr.id?'⏸':'▶'}</button>
+      <div class="track-meta"><div class="track-name">${escapeHtml(tr.name)}</div><div class="track-type">${TYPE_ICON[tr.type]||'🎧'} ${typeName}</div></div>
+      ${adminMode?'<button class="track-del" aria-label="del">✕</button>':''}`;
+    card.querySelector('.track-play').onclick = ()=>toggleTrack(tr);
+    const del = card.querySelector('.track-del');
+    if(del) del.onclick = async ()=>{ if(libPlayingId===tr.id) stopTrack(); tracks.splice(idx,1); await saveTracks(); renderLibrary(); };
+    list.appendChild(card);
+  });
+}
+function stopTrack(){ if(libAudio){ libAudio.pause(); libAudio=null; } libPlayingId=null; renderLibrary(); }
+function toggleTrack(tr){
+  if(libPlayingId===tr.id){ stopTrack(); return; }
+  if(libAudio){ libAudio.pause(); libAudio=null; }
+  // stop ambient sounds if playing
+  if(typeof stopAllSound==='function' && activeSound){ stopAllSound(); renderSounds(); }
+  libAudio = new Audio(tr.src);
+  libAudio.play().catch(()=>{});
+  libAudio.onended = ()=>{ stopTrack(); };
+  libAudio.onerror = ()=>{ stopTrack(); };
+  libPlayingId = tr.id;
+  renderLibrary();
+}
+
+/* --- Admin unlock: long-press on the app title --- */
+let pressTimer = null;
+const titleEl = $('app-title');
+titleEl.addEventListener('pointerdown',()=>{ pressTimer = setTimeout(toggleAdmin, 1500); });
+['pointerup','pointerleave','pointercancel'].forEach(ev=>titleEl.addEventListener(ev,()=>clearTimeout(pressTimer)));
+function toggleAdmin(){
+  adminMode = !adminMode;
+  $('library-add').style.display = adminMode ? 'flex' : 'none';
+  renderLibrary();
+  // small confirmation via status dot color
+  const note = document.createElement('div');
+  note.textContent = adminMode ? t().adminOn : t().adminOff;
+  note.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:var(--surface3);color:var(--fg);padding:9px 18px;border-radius:20px;font-size:12px;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,.4)';
+  document.body.appendChild(note);
+  setTimeout(()=>note.remove(),1800);
+}
+
+/* --- Add track dialog --- */
+const tdDialog = $('track-dialog');
+function openTrackDialog(){
+  tdMode='file'; tdFileData=null;
+  $('td-title').textContent = t().tdTitle;
+  $('td-name').value=''; $('td-name').placeholder = t().tdName;
+  $('td-tab-file').textContent = t().tdFile;
+  $('td-tab-link').textContent = t().tdLink;
+  $('td-pick').textContent = t().tdPick;
+  $('td-filename').textContent='';
+  $('td-url').value=''; $('td-url').placeholder = t().tdUrl;
+  $('td-link-hint').textContent = t().tdLinkHint;
+  $('td-cancel').textContent = t().tdCancel;
+  $('td-save').textContent = t().tdSave;
+  // type select
+  const sel = $('td-type'); sel.innerHTML='';
+  Object.keys(t().tdTypes).forEach(k=>{ const o=document.createElement('option'); o.value=k; o.textContent=t().tdTypes[k]; sel.appendChild(o); });
+  setTdMode('file');
+  tdDialog.classList.add('visible');
+}
+function setTdMode(m){
+  tdMode=m;
+  $('td-tab-file').classList.toggle('active',m==='file');
+  $('td-tab-link').classList.toggle('active',m==='link');
+  $('td-file-area').style.display = m==='file'?'block':'none';
+  $('td-link-area').style.display = m==='link'?'block':'none';
+}
+$('library-add').addEventListener('click',openTrackDialog);
+$('td-tab-file').addEventListener('click',()=>setTdMode('file'));
+$('td-tab-link').addEventListener('click',()=>setTdMode('link'));
+$('td-pick').addEventListener('click',()=>$('td-file').click());
+$('td-file').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f) return;
+  $('td-filename').textContent = f.name;
+  if(!$('td-name').value) $('td-name').value = f.name.replace(/\.[^.]+$/,'');
+  const reader=new FileReader();
+  reader.onload=()=>{ tdFileData=reader.result; };
+  reader.readAsDataURL(f);
+});
+$('td-cancel').addEventListener('click',()=>tdDialog.classList.remove('visible'));
+tdDialog.addEventListener('click',e=>{ if(e.target.id==='track-dialog') tdDialog.classList.remove('visible'); });
+$('td-save').addEventListener('click',async ()=>{
+  const name = $('td-name').value.trim() || t().tdTypes[$('td-type').value];
+  const type = $('td-type').value;
+  let src = null;
+  if(tdMode==='file'){ if(!tdFileData) return; src = tdFileData; }
+  else {
+    const url = $('td-url').value.trim();
+    if(!url) return;
+    if(/youtube\.com|youtu\.be/i.test(url)){ $('td-link-hint').textContent = t().tdYTWarn; $('td-link-hint').style.color='var(--danger)'; return; }
+    src = url;
+  }
+  tracks.unshift({id:Date.now()+''+Math.random().toString(36).slice(2,6), name, type, src});
+  await saveTracks();
+  renderLibrary();
+  tdDialog.classList.remove('visible');
+});
+function renderQuote(){
+  const qs = t().quotes;
+  $('quote-text').textContent = qs[Math.floor(Math.random()*qs.length)];
+}
+$('quote-refresh').addEventListener('click',renderQuote);
+
+/* ================= SOS ================= */
+function renderSOS(){
+  const a = $('sos-actions'); a.innerHTML='';
+  // breathe first option
+  const b = document.createElement('button');
+  b.className='sos-action';
+  b.innerHTML = `${t().sosBreathe}<small>${t().sosBreatheSub}</small>`;
+  b.onclick = ()=>{
+    $('sos-overlay').classList.remove('visible');
+    document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+    document.querySelector('[data-view="breathe"]').classList.add('active');
+    $('view-breathe').classList.add('active');
+    currentTech='coherence'; renderTechs();
+    if(!breathing) startBreathing();
+  };
+  a.appendChild(b);
+  t().helplines.forEach(h=>{
+    const el = document.createElement('a');
+    el.className='sos-action';
+    el.href = h.href; el.target='_blank'; el.rel='noopener';
+    el.innerHTML = `${h.label}<small>${h.sub}</small>`;
+    a.appendChild(el);
+  });
+}
+$('sos-btn').addEventListener('click',()=>$('sos-overlay').classList.add('visible'));
+$('sos-close').addEventListener('click',()=>$('sos-overlay').classList.remove('visible'));
+
+/* ================= LANG PERSISTENCE ================= */
+async function saveLang(){ try{ await window.storage.set('lang',lang); }catch(e){} }
+async function loadLang(){
+  try{
+    const r = await window.storage.get('lang');
+    if(r && T[r.value]) lang = r.value;
+  }catch(e){}
+}
+$('lang-btn').addEventListener('click',e=>{ e.stopPropagation(); $('lang-menu').classList.toggle('visible'); });
+document.addEventListener('click',e=>{ if(!$('lang-menu').contains(e.target)) $('lang-menu').classList.remove('visible'); });
+
+/* ================= INIT ================= */
+(async function init(){
+  await loadLang();
+  applyLang();
+  renderLangMenu();
+  await loadEntries();
+  await loadRefuges();
+  await loadTracks();
+  inputEl.focus();
+})();
+</script>
+</body>
+</html>
