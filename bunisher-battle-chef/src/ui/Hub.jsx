@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { GameState } from '../game/state/GameState.js';
 import RushGame from './RushGame.jsx';
+import KitchenGame from './KitchenGame.jsx';
+import ShowdownGame from './ShowdownGame.jsx';
 
-// Kitchen and Showdown plug in here once their scenes exist.
 const MODES = [
-  { id: 'rush', title: 'Rush', desc: 'Endless runner 3 voies', icon: '🏃', ready: true },
-  { id: 'kitchen', title: 'Kitchen', desc: 'Mini-jeux de cuisine', icon: '🔪', ready: false },
-  { id: 'showdown', title: 'Showdown', desc: 'Combat de boss', icon: '⚔️', ready: false },
+  { id: 'rush', title: 'Rush', desc: 'Livraisons en ville — 3 voies', icon: '🛵' },
+  { id: 'kitchen', title: 'Kitchen', desc: 'Recette au timing → XP + buff', icon: '🔪' },
+  { id: 'showdown', title: 'Showdown', desc: "Boss : Gril d'Acier", icon: '⚔️' },
 ];
 
 /** Food-truck hub: entry point to the three modes and the player's progression. */
@@ -16,7 +17,22 @@ export default function Hub() {
 
   useEffect(() => GameState.subscribe(setSave), []);
 
-  if (mode === 'rush') return <RushGame onExit={() => setMode(null)} />;
+  const exit = () => setMode(null);
+  if (mode === 'rush') return <RushGame onExit={exit} />;
+  if (mode === 'kitchen') return <KitchenGame onExit={exit} />;
+  if (mode === 'showdown') return <ShowdownGame onExit={exit} />;
+
+  const badge = (id) => {
+    if (id === 'showdown') {
+      const parts = [];
+      if (save.energy > 0) parts.push(`⚡ ${save.energy}`);
+      if (save.buffs.length) parts.push(`🔥 ${save.buffs.length}`);
+      if (save.bossesDefeated.includes('gril-acier')) parts.push('✔ battu');
+      return parts.join(' · ');
+    }
+    if (id === 'rush' && save.bestDeliveries) return `📦 ${save.bestDeliveries}`;
+    return '';
+  };
 
   return (
     <div className="hub">
@@ -25,7 +41,10 @@ export default function Hub() {
           <span className="hub-logo-mark" />
           <h1>Bunisher<br />Battle Chef</h1>
         </div>
-        <div className="hub-wallet">🪙 {save.coins.toLocaleString('fr-FR')}</div>
+        <div className="hub-wallet">
+          <span className="coins">🪙 {save.coins.toLocaleString('fr-FR')}</span>
+          <span className="energy">⚡ {save.energy}</span>
+        </div>
       </header>
 
       <div className="hub-truck" aria-hidden="true">
@@ -38,23 +57,20 @@ export default function Hub() {
 
       <section className="hub-modes">
         {MODES.map((m) => (
-          <button
-            key={m.id}
-            className={`mode-card${m.ready ? '' : ' mode-card--locked'}`}
-            disabled={!m.ready}
-            onClick={() => setMode(m.id)}
-          >
+          <button key={m.id} className="mode-card" onClick={() => setMode(m.id)}>
             <span className="mode-icon">{m.icon}</span>
             <span className="mode-text">
               <strong>{m.title}</strong>
-              <small>{m.ready ? m.desc : 'Bientôt'}</small>
+              <small>{m.desc}</small>
             </span>
+            <span className="mode-badge">{badge(m.id)}</span>
           </button>
         ))}
       </section>
 
       <footer className="hub-stats">
         <div><small>Meilleur score</small><strong>{save.bestScore.toLocaleString('fr-FR')}</strong></div>
+        <div><small>XP</small><strong>{save.xp}</strong></div>
         <div><small>Runs</small><strong>{save.totalRuns}</strong></div>
       </footer>
     </div>
